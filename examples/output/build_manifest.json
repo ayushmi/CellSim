@@ -1,0 +1,75 @@
+{
+  "action_mapper_version": "0.2.0",
+  "benchmark_split_version": "0.1.0",
+  "build_id": "cod_20260420T160636Z",
+  "build_kind": "fixture",
+  "counts": {
+    "events": 8,
+    "evidence_traces": 27,
+    "metabolome_values": 2,
+    "signaling_values": 6,
+    "transcriptome_values": 11
+  },
+  "materialization_timestamp": "2026-04-20T16:06:36.840465+00:00",
+  "ontology_version": "0.1.0",
+  "output_dir": "/Users/ayush/Development/PhysicalAI/CellSim/examples/output",
+  "schema_version": "0.2.0",
+  "source_manifest_bundle": [],
+  "source_support_matrix_version": "0.2.0",
+  "summary_stats": {
+    "action_distribution": {
+      "activate_inflammatory_cytokine_program": 1,
+      "activate_interferon_program": 1,
+      "increase_glycolysis": 1,
+      "maintain_homeostatic_program": 4,
+      "suppress_interferon_program": 1
+    },
+    "action_label_coverage": 8,
+    "benchmark_rows": 8,
+    "event_type_distribution": {
+      "context_event": 1,
+      "knowledge_support_event": 1,
+      "outcome_support_event": 1,
+      "state_event": 3,
+      "transition_event": 2
+    },
+    "events": 8,
+    "evidence_tier_distribution": {
+      "0": 4,
+      "1": 2,
+      "3": 2
+    },
+    "evidence_trace_rows": 27,
+    "fraction_with_expression_features": 0.625,
+    "fraction_with_outcomes": 0.125,
+    "fraction_with_perturbation_evidence": 0.25,
+    "pairing_status_distribution": {
+      "exact_cell": 4,
+      "exact_sample": 1,
+      "probabilistic_context": 3
+    },
+    "record_origin_distribution": {
+      "fixture": 8
+    },
+    "source_family_coverage": 6,
+    "sources": {
+      "ENCODE": 1,
+      "HuBMAP": 1,
+      "Human Cell Atlas": 2,
+      "OmniPath": 1,
+      "Perturb-seq": 2,
+      "TCGA": 1
+    },
+    "state_depth_distribution": {
+      "context_only": 2,
+      "outcome_bearing": 1,
+      "state_bearing": 3,
+      "transition_bearing": 2
+    },
+    "state_representation_distribution": {
+      "harmonized": 5,
+      "inferred": 2,
+      "normalized_measured": 1
+    }
+  }
+}

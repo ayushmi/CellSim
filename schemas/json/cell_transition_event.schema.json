@@ -1,0 +1,1539 @@
+{
+  "$defs": {
+    "ActionAssignmentMethod": {
+      "enum": [
+        "direct",
+        "curated",
+        "inferred",
+        "weak_supervision",
+        "model_assisted"
+      ],
+      "title": "ActionAssignmentMethod",
+      "type": "string"
+    },
+    "ActionDirectionality": {
+      "enum": [
+        "activate",
+        "suppress",
+        "switch",
+        "maintain",
+        "exit",
+        "enter"
+      ],
+      "title": "ActionDirectionality",
+      "type": "string"
+    },
+    "CausalEvidenceTier": {
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "title": "CausalEvidenceTier",
+      "type": "integer"
+    },
+    "InterventionDirection": {
+      "enum": [
+        "knockout",
+        "knockdown",
+        "overexpression",
+        "inhibition",
+        "activation",
+        "exposure",
+        "withdrawal",
+        "none"
+      ],
+      "title": "InterventionDirection",
+      "type": "string"
+    },
+    "InterventionType": {
+      "enum": [
+        "genetic",
+        "chemical",
+        "ligand",
+        "environmental",
+        "mechanical",
+        "infectious",
+        "combinatorial",
+        "none"
+      ],
+      "title": "InterventionType",
+      "type": "string"
+    },
+    "PairingStatus": {
+      "enum": [
+        "exact_cell",
+        "exact_sample",
+        "probabilistic_context",
+        "pseudo_cell",
+        "unpaired"
+      ],
+      "title": "PairingStatus",
+      "type": "string"
+    },
+    "StateRepresentationType": {
+      "enum": [
+        "raw_measured",
+        "normalized_measured",
+        "harmonized",
+        "inferred"
+      ],
+      "title": "StateRepresentationType",
+      "type": "string"
+    },
+    "SupportDomainTag": {
+      "enum": [
+        "in_domain",
+        "near_domain",
+        "out_of_domain"
+      ],
+      "title": "SupportDomainTag",
+      "type": "string"
+    },
+    "TimeAnchorType": {
+      "enum": [
+        "baseline",
+        "post_perturbation",
+        "diagnosis",
+        "treatment_cycle",
+        "developmental_stage",
+        "inferred"
+      ],
+      "title": "TimeAnchorType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cod_event_id": {
+      "title": "Cod Event Id",
+      "type": "string"
+    },
+    "cod_subject_id": {
+      "title": "Cod Subject Id",
+      "type": "string"
+    },
+    "cod_cell_instance_id": {
+      "title": "Cod Cell Instance Id",
+      "type": "string"
+    },
+    "cod_parent_event_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cod Parent Event Id"
+    },
+    "cod_batch_id": {
+      "title": "Cod Batch Id",
+      "type": "string"
+    },
+    "cod_release_version": {
+      "title": "Cod Release Version",
+      "type": "string"
+    },
+    "source_dataset": {
+      "title": "Source Dataset",
+      "type": "string"
+    },
+    "source_family": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Family"
+    },
+    "source_study_id": {
+      "title": "Source Study Id",
+      "type": "string"
+    },
+    "source_sample_id": {
+      "title": "Source Sample Id",
+      "type": "string"
+    },
+    "source_cell_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Cell Id"
+    },
+    "source_assay_id": {
+      "title": "Source Assay Id",
+      "type": "string"
+    },
+    "source_record_pointer": {
+      "title": "Source Record Pointer",
+      "type": "string"
+    },
+    "source_accession": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Accession"
+    },
+    "source_download_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Download Url"
+    },
+    "source_downloaded_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Downloaded At"
+    },
+    "source_checksum": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Checksum"
+    },
+    "source_release_info": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Release Info"
+    },
+    "processing_pipeline_version": {
+      "title": "Processing Pipeline Version",
+      "type": "string"
+    },
+    "evidence_trace_id": {
+      "title": "Evidence Trace Id",
+      "type": "string"
+    },
+    "license_class": {
+      "title": "License Class",
+      "type": "string"
+    },
+    "record_origin_type": {
+      "default": "fixture",
+      "title": "Record Origin Type",
+      "type": "string"
+    },
+    "species": {
+      "title": "Species",
+      "type": "string"
+    },
+    "donor_id_normalized": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Donor Id Normalized"
+    },
+    "sex": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sex"
+    },
+    "age": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Age"
+    },
+    "ancestry": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ancestry"
+    },
+    "health_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Health Status"
+    },
+    "disease_state": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Disease State"
+    },
+    "disease_ontology_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Disease Ontology Id"
+    },
+    "tissue_label": {
+      "title": "Tissue Label",
+      "type": "string"
+    },
+    "uberon_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Uberon Id"
+    },
+    "cell_type_label": {
+      "title": "Cell Type Label",
+      "type": "string"
+    },
+    "cell_ontology_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cell Ontology Id"
+    },
+    "developmental_stage": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Developmental Stage"
+    },
+    "microenvironment_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Microenvironment Label"
+    },
+    "spatial_region_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Spatial Region Label"
+    },
+    "time_anchor_type": {
+      "$ref": "#/$defs/TimeAnchorType"
+    },
+    "t0_timestamp": {
+      "title": "T0 Timestamp",
+      "type": "string"
+    },
+    "t0_time_unit": {
+      "title": "T0 Time Unit",
+      "type": "string"
+    },
+    "delta_t_to_output": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Delta T To Output"
+    },
+    "delta_t_to_outcome": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Delta T To Outcome"
+    },
+    "trajectory_group_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trajectory Group Id"
+    },
+    "time_uncertainty_score": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Time Uncertainty Score",
+      "type": "number"
+    },
+    "intervention_present": {
+      "title": "Intervention Present",
+      "type": "boolean"
+    },
+    "intervention_type": {
+      "$ref": "#/$defs/InterventionType"
+    },
+    "intervention_target_entity": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intervention Target Entity"
+    },
+    "intervention_target_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intervention Target Id"
+    },
+    "intervention_direction": {
+      "$ref": "#/$defs/InterventionDirection",
+      "default": "none"
+    },
+    "intervention_dose": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intervention Dose"
+    },
+    "intervention_dose_unit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intervention Dose Unit"
+    },
+    "intervention_duration": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intervention Duration"
+    },
+    "intervention_delivery_mode": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intervention Delivery Mode"
+    },
+    "intervention_combo_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intervention Combo Id"
+    },
+    "control_definition": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Control Definition"
+    },
+    "has_genome_state": {
+      "default": false,
+      "title": "Has Genome State",
+      "type": "boolean"
+    },
+    "has_epigenome_state": {
+      "default": false,
+      "title": "Has Epigenome State",
+      "type": "boolean"
+    },
+    "has_transcriptome_state": {
+      "default": false,
+      "title": "Has Transcriptome State",
+      "type": "boolean"
+    },
+    "has_proteome_state": {
+      "default": false,
+      "title": "Has Proteome State",
+      "type": "boolean"
+    },
+    "has_phosphoproteome_state": {
+      "default": false,
+      "title": "Has Phosphoproteome State",
+      "type": "boolean"
+    },
+    "has_metabolome_state": {
+      "default": false,
+      "title": "Has Metabolome State",
+      "type": "boolean"
+    },
+    "has_spatial_state": {
+      "default": false,
+      "title": "Has Spatial State",
+      "type": "boolean"
+    },
+    "has_neighbor_context": {
+      "default": false,
+      "title": "Has Neighbor Context",
+      "type": "boolean"
+    },
+    "has_clinical_context": {
+      "default": false,
+      "title": "Has Clinical Context",
+      "type": "boolean"
+    },
+    "has_time_series_context": {
+      "default": false,
+      "title": "Has Time Series Context",
+      "type": "boolean"
+    },
+    "genome_profile_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Genome Profile Ref"
+    },
+    "epigenome_profile_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Epigenome Profile Ref"
+    },
+    "transcriptome_profile_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Transcriptome Profile Ref"
+    },
+    "proteome_profile_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proteome Profile Ref"
+    },
+    "phosphoproteome_profile_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phosphoproteome Profile Ref"
+    },
+    "metabolome_profile_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Metabolome Profile Ref"
+    },
+    "spatial_profile_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Spatial Profile Ref"
+    },
+    "neighbor_profile_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Neighbor Profile Ref"
+    },
+    "state_embedding_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "State Embedding Ref"
+    },
+    "state_summary_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "State Summary Ref"
+    },
+    "external_signal_set_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "External Signal Set Ref"
+    },
+    "resource_state_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resource State Ref"
+    },
+    "stress_state_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stress State Ref"
+    },
+    "cell_cycle_state": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cell Cycle State"
+    },
+    "mitochondrial_state": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mitochondrial State"
+    },
+    "damage_response_state": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Damage Response State"
+    },
+    "senescence_state": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Senescence State"
+    },
+    "immune_context_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Immune Context Ref"
+    },
+    "constraint_profile_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Constraint Profile Ref"
+    },
+    "pre_state_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pre State Ref"
+    },
+    "post_state_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Post State Ref"
+    },
+    "intervention_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intervention Ref"
+    },
+    "constraint_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Constraint Refs",
+      "type": "array"
+    },
+    "reward_context_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reward Context Ref"
+    },
+    "measured_state_flag": {
+      "default": false,
+      "title": "Measured State Flag",
+      "type": "boolean"
+    },
+    "harmonized_state_flag": {
+      "default": false,
+      "title": "Harmonized State Flag",
+      "type": "boolean"
+    },
+    "inferred_state_flag": {
+      "default": false,
+      "title": "Inferred State Flag",
+      "type": "boolean"
+    },
+    "probabilistic_linkage_flag": {
+      "default": false,
+      "title": "Probabilistic Linkage Flag",
+      "type": "boolean"
+    },
+    "action_level_0": {
+      "title": "Action Level 0",
+      "type": "string"
+    },
+    "action_level_1": {
+      "title": "Action Level 1",
+      "type": "string"
+    },
+    "action_level_2": {
+      "title": "Action Level 2",
+      "type": "string"
+    },
+    "action_label_set_ref": {
+      "title": "Action Label Set Ref",
+      "type": "string"
+    },
+    "action_primary_label": {
+      "title": "Action Primary Label",
+      "type": "string"
+    },
+    "action_intensity_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Action Intensity Score",
+      "type": "number"
+    },
+    "action_directionality": {
+      "$ref": "#/$defs/ActionDirectionality"
+    },
+    "action_zone": {
+      "title": "Action Zone",
+      "type": "string"
+    },
+    "action_confidence_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Action Confidence Score",
+      "type": "number"
+    },
+    "action_assignment_method": {
+      "$ref": "#/$defs/ActionAssignmentMethod"
+    },
+    "short_horizon_output_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Short Horizon Output Ref"
+    },
+    "differential_expression_signature_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Differential Expression Signature Ref"
+    },
+    "differential_protein_signature_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Differential Protein Signature Ref"
+    },
+    "differential_metabolite_signature_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Differential Metabolite Signature Ref"
+    },
+    "secretome_signature_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Secretome Signature Ref"
+    },
+    "morphology_signature_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Morphology Signature Ref"
+    },
+    "viability_measure": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Viability Measure"
+    },
+    "proliferation_measure": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proliferation Measure"
+    },
+    "output_confidence_score": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Output Confidence Score",
+      "type": "number"
+    },
+    "long_horizon_outcome_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Long Horizon Outcome Ref"
+    },
+    "fate_outcome_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fate Outcome Label"
+    },
+    "tissue_outcome_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tissue Outcome Label"
+    },
+    "therapy_response_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Therapy Response Label"
+    },
+    "disease_progression_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Disease Progression Label"
+    },
+    "survival_proxy": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Survival Proxy"
+    },
+    "outcome_time_horizon": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Outcome Time Horizon"
+    },
+    "outcome_confidence_score": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Outcome Confidence Score",
+      "type": "number"
+    },
+    "reward_context_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reward Context Label"
+    },
+    "candidate_reward_variables_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Candidate Reward Variables Ref"
+    },
+    "fitness_proxy_score": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fitness Proxy Score"
+    },
+    "homeostasis_proxy_score": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Homeostasis Proxy Score"
+    },
+    "immune_function_proxy_score": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Immune Function Proxy Score"
+    },
+    "reward_inference_method": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reward Inference Method"
+    },
+    "raw_qc_score": {
+      "default": 1.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Raw Qc Score",
+      "type": "number"
+    },
+    "harmonization_qc_score": {
+      "default": 1.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Harmonization Qc Score",
+      "type": "number"
+    },
+    "batch_correction_flag": {
+      "default": false,
+      "title": "Batch Correction Flag",
+      "type": "boolean"
+    },
+    "imputation_flag": {
+      "default": false,
+      "title": "Imputation Flag",
+      "type": "boolean"
+    },
+    "deconvolution_flag": {
+      "default": false,
+      "title": "Deconvolution Flag",
+      "type": "boolean"
+    },
+    "modality_conflict_flag": {
+      "default": false,
+      "title": "Modality Conflict Flag",
+      "type": "boolean"
+    },
+    "manual_review_flag": {
+      "default": false,
+      "title": "Manual Review Flag",
+      "type": "boolean"
+    },
+    "exclusion_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exclusion Reason"
+    },
+    "state_representation_type": {
+      "$ref": "#/$defs/StateRepresentationType",
+      "default": "harmonized"
+    },
+    "assay_distortion_notes_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Assay Distortion Notes Ref"
+    },
+    "measurement_support_score": {
+      "default": 1.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Measurement Support Score",
+      "type": "number"
+    },
+    "causal_evidence_tier": {
+      "$ref": "#/$defs/CausalEvidenceTier",
+      "default": 0
+    },
+    "causal_support_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Causal Support Ref"
+    },
+    "replication_count": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Replication Count",
+      "type": "integer"
+    },
+    "mechanistic_support_score": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Mechanistic Support Score",
+      "type": "number"
+    },
+    "prediction_support_score": {
+      "default": 1.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Prediction Support Score",
+      "type": "number"
+    },
+    "ood_flag": {
+      "default": false,
+      "title": "Ood Flag",
+      "type": "boolean"
+    },
+    "abstention_recommended_flag": {
+      "default": false,
+      "title": "Abstention Recommended Flag",
+      "type": "boolean"
+    },
+    "uncertainty_vector_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Uncertainty Vector Ref"
+    },
+    "measurement_pairing_status": {
+      "$ref": "#/$defs/PairingStatus",
+      "default": "unpaired"
+    },
+    "temporal_completeness_flag": {
+      "default": false,
+      "title": "Temporal Completeness Flag",
+      "type": "boolean"
+    },
+    "intervention_completeness_flag": {
+      "default": false,
+      "title": "Intervention Completeness Flag",
+      "type": "boolean"
+    },
+    "support_density_estimate": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Support Density Estimate",
+      "type": "number"
+    },
+    "support_domain_tag": {
+      "$ref": "#/$defs/SupportDomainTag",
+      "default": "in_domain"
+    },
+    "harmonization_confidence": {
+      "default": 1.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Harmonization Confidence",
+      "type": "number"
+    },
+    "action_label_provenance_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Action Label Provenance Ref"
+    },
+    "state_depth_category": {
+      "default": "metadata_only",
+      "enum": [
+        "metadata_only",
+        "context_only",
+        "weak_state_bearing",
+        "state_bearing",
+        "transition_bearing",
+        "outcome_bearing"
+      ],
+      "title": "State Depth Category",
+      "type": "string"
+    },
+    "event_type": {
+      "default": "metadata_event",
+      "enum": [
+        "metadata_event",
+        "context_event",
+        "state_event",
+        "transition_event",
+        "knowledge_support_event",
+        "outcome_support_event",
+        "composite_event"
+      ],
+      "title": "Event Type",
+      "type": "string"
+    },
+    "has_expression_features": {
+      "default": false,
+      "title": "Has Expression Features",
+      "type": "boolean"
+    },
+    "expression_feature_count": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Expression Feature Count",
+      "type": "integer"
+    },
+    "outcome_present_flag": {
+      "default": false,
+      "title": "Outcome Present Flag",
+      "type": "boolean"
+    },
+    "output_present_flag": {
+      "default": false,
+      "title": "Output Present Flag",
+      "type": "boolean"
+    },
+    "output_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Type"
+    },
+    "action_candidate_labels": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Action Candidate Labels",
+      "type": "array"
+    },
+    "action_evidence_summary": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Action Evidence Summary"
+    }
+  },
+  "required": [
+    "cod_event_id",
+    "cod_subject_id",
+    "cod_cell_instance_id",
+    "cod_batch_id",
+    "cod_release_version",
+    "source_dataset",
+    "source_study_id",
+    "source_sample_id",
+    "source_assay_id",
+    "source_record_pointer",
+    "processing_pipeline_version",
+    "evidence_trace_id",
+    "license_class",
+    "species",
+    "tissue_label",
+    "cell_type_label",
+    "time_anchor_type",
+    "t0_timestamp",
+    "t0_time_unit",
+    "intervention_present",
+    "intervention_type",
+    "action_level_0",
+    "action_level_1",
+    "action_level_2",
+    "action_label_set_ref",
+    "action_primary_label",
+    "action_intensity_score",
+    "action_directionality",
+    "action_zone",
+    "action_confidence_score",
+    "action_assignment_method"
+  ],
+  "title": "CellTransitionEvent",
+  "type": "object"
+}

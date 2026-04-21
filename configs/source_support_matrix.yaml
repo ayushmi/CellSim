@@ -1,0 +1,249 @@
+version: 1.0.0
+sources:
+  - source_family: baseline_state
+    source_name: Human Cell Atlas
+    upstream_access_surface: HCA Azul Data Browser API and object manifests
+    access_class: public
+    automated_fetch_available: true
+    payload_type: sample and project metadata, expandable to file manifests
+    state_depth: metadata_first
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: low_to_moderate
+    current_status: partially implemented
+    blockers: full expression ingestion requires per-project file resolution and heavier downstream processing
+    next_steps: add project-specific expression subset download and pseudo-cell state summaries
+  - source_family: baseline_state
+    source_name: GTEx
+    upstream_access_surface: GTEx Portal / dbGaP-linked distributions
+    access_class: mixed
+    automated_fetch_available: true
+    payload_type: bulk expression and sample metadata
+    state_depth: bulk_state_potential
+    intervention_depth: none
+    outcome_depth: low
+    action_usefulness: low
+    current_status: public-subset deeply implemented
+    blockers: current open path is bulk tissue reference rather than single-cell state
+    next_steps: add optional gene-set scoring and broader healthy reference panels
+  - source_family: baseline_state
+    source_name: Tabula Sapiens
+    upstream_access_surface: public object storage / downloadable cell atlases
+    access_class: public
+    automated_fetch_available: false
+    payload_type: single-cell expression objects
+    state_depth: high
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: moderate
+    current_status: partially implemented
+    blockers: default repo path uses manual/local h5ad adapter rather than automated public fetch
+    next_steps: add reproducible small remote subset selection
+  - source_family: regulatory_logic
+    source_name: ENCODE
+    upstream_access_surface: ENCODE REST API and file download endpoints
+    access_class: public
+    automated_fetch_available: true
+    payload_type: experiment metadata and file metadata, expandable to signal files
+    state_depth: regulatory_metadata_first
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: moderate
+    current_status: partially implemented
+    blockers: real signal summarization from bigWig/peak files is not yet in place
+    next_steps: add targeted peak/signal summarizer for marker loci and regulatory program scores
+  - source_family: regulatory_logic
+    source_name: Roadmap Epigenomics
+    upstream_access_surface: consortium downloads and metadata pages
+    access_class: public
+    automated_fetch_available: false
+    payload_type: epigenomic tracks and chromatin state files
+    state_depth: high
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: moderate
+    current_status: partially implemented
+    blockers: current implementation is local/manual metadata adapter rather than default automated fetch
+    next_steps: add one official chromatin-state public subset fetch path
+  - source_family: regulatory_logic
+    source_name: TRRUST
+    upstream_access_surface: downloadable TF-target interaction tables
+    access_class: public
+    automated_fetch_available: true
+    payload_type: regulatory edges
+    state_depth: graph_only
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: moderate
+    current_status: knowledge/ontology fully integrated
+    blockers: current path is edge-level knowledge integration, not state-bearing observation
+    next_steps: incorporate TF-target support into action scoring
+  - source_family: perturbation_response
+    source_name: Perturb-seq
+    upstream_access_surface: GEO supplementary metadata and raw tar bundle
+    access_class: public
+    automated_fetch_available: true
+    payload_type: cell metadata plus public count matrices for selected studies
+    state_depth: medium
+    intervention_depth: high
+    outcome_depth: low_to_moderate
+    action_usefulness: high
+    current_status: public-subset deeply implemented
+    blockers: generalized multi-study matrix parsing and differential pipeline are still limited
+    next_steps: add per-study count extraction, pre/post pairing logic, and differential program inference
+  - source_family: perturbation_response
+    source_name: LINCS
+    upstream_access_surface: clue.io / GEO / public signatures
+    access_class: public
+    automated_fetch_available: true
+    payload_type: perturbation signatures
+    state_depth: medium
+    intervention_depth: high
+    outcome_depth: low
+    action_usefulness: high
+    current_status: public-subset deeply implemented
+    blockers: public path uses a small Level2 landmark-gene subset rather than full compendium signatures
+    next_steps: add larger compound/time/cell coverage and optional Level5 support
+  - source_family: perturbation_response
+    source_name: DepMap
+    upstream_access_surface: public portal downloads
+    access_class: public
+    automated_fetch_available: true
+    payload_type: dependency and viability matrices
+    state_depth: medium
+    intervention_depth: high
+    outcome_depth: medium
+    action_usefulness: high
+    current_status: public-subset deeply implemented
+    blockers: current path uses public pediatric subset rather than the full portal release
+    next_steps: add broader release support and multi-omics constraints
+  - source_family: metabolism_feasibility
+    source_name: Recon3D
+    upstream_access_surface: downloadable model files
+    access_class: public
+    automated_fetch_available: false
+    payload_type: metabolic network model
+    state_depth: graph_only
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: moderate
+    current_status: partially implemented
+    blockers: current implementation is a local SBML/manual adapter rather than automated fetch
+    next_steps: add official Recon3D model fetch and reaction-rule parsing
+  - source_family: metabolism_feasibility
+    source_name: BioModels
+    upstream_access_surface: BioModels API
+    access_class: public
+    automated_fetch_available: true
+    payload_type: mechanistic models
+    state_depth: simulated_model
+    intervention_depth: variable
+    outcome_depth: simulated
+    action_usefulness: moderate
+    current_status: knowledge/ontology fully integrated
+    blockers: current integration uses model metadata and download refs, not simulation execution
+    next_steps: add model family scoring and simulation-ready manifests
+  - source_family: metabolism_feasibility
+    source_name: HMDB
+    upstream_access_surface: HMDB downloads / metabolite registry exports
+    access_class: mixed
+    automated_fetch_available: false
+    payload_type: metabolite registry and annotations
+    state_depth: registry_only
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: low_to_moderate
+    current_status: partially implemented
+    blockers: anti-bot/licensing boundaries mean the default repo path relies on a local download adapter
+    next_steps: add richer metabolite-gene mapping once local XML is supplied
+  - source_family: spatial_context
+    source_name: HuBMAP
+    upstream_access_surface: Search API plus CLT/Globus for deeper transfer
+    access_class: mixed
+    automated_fetch_available: true
+    payload_type: public dataset metadata, expandable to deeper spatial payloads
+    state_depth: metadata_first
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: moderate
+    current_status: partially implemented
+    blockers: full spatial payload transfer and neighborhood reconstruction are not yet automated
+    next_steps: add CLT-compatible adapter and coordinate/neighborhood summarizer
+  - source_family: spatial_context
+    source_name: CELLxGENE
+    upstream_access_surface: CELLxGENE data portal / census
+    access_class: public
+    automated_fetch_available: true
+    payload_type: public h5ad subset with per-cell expression slices
+    state_depth: high
+    intervention_depth: low
+    outcome_depth: low
+    action_usefulness: moderate
+    current_status: public-subset deeply implemented
+    blockers: only a small public subset is ingested and only marker-gene slices are extracted
+    next_steps: add broader atlas coverage and optional full-expression summarization
+  - source_family: clinical_outcomes
+    source_name: TCGA
+    upstream_access_surface: GDC open APIs and controlled genomic files
+    access_class: mixed
+    automated_fetch_available: true
+    payload_type: open clinical metadata, controlled genomics
+    state_depth: metadata_first_public
+    intervention_depth: low
+    outcome_depth: medium
+    action_usefulness: low_to_moderate
+    current_status: controlled-data adapter implemented
+    blockers: deep molecular state requires controlled or larger public file handling
+    next_steps: add open expression/public biospecimen subset and controlled-data adapter docs
+  - source_family: clinical_outcomes
+    source_name: UK Biobank
+    upstream_access_surface: controlled access platform
+    access_class: controlled
+    automated_fetch_available: false
+    payload_type: participant-scale phenotype and omics
+    state_depth: high_potential
+    intervention_depth: observational
+    outcome_depth: high
+    action_usefulness: low_to_moderate
+    current_status: controlled-data adapter implemented
+    blockers: cohort access remains controlled and cannot be automated in the public-open repo
+    next_steps: use local adapter with approved export tables
+  - source_family: signaling_graph
+    source_name: Reactome
+    upstream_access_surface: public downloads and content service
+    access_class: public
+    automated_fetch_available: true
+    payload_type: pathways and relations
+    state_depth: graph_only
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: high
+    current_status: knowledge/ontology fully integrated
+    blockers: current path is pathway/knowledge support rather than direct cellular measurement
+    next_steps: use pathway memberships in benchmark features and action support
+  - source_family: signaling_graph
+    source_name: KEGG
+    upstream_access_surface: web APIs with licensing caveats
+    access_class: mixed
+    automated_fetch_available: false
+    payload_type: pathways and reactions
+    state_depth: graph_only
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: high
+    current_status: controlled-data adapter implemented
+    blockers: licensing/reuse boundaries still prevent a default automated public-open fetch path
+    next_steps: support local-user TSV/pathway imports via manual adapter
+  - source_family: signaling_graph
+    source_name: OmniPath
+    upstream_access_surface: public web service
+    access_class: public
+    automated_fetch_available: true
+    payload_type: interaction edges and signaling priors
+    state_depth: graph_only
+    intervention_depth: none
+    outcome_depth: none
+    action_usefulness: high
+    current_status: knowledge/ontology fully integrated
+    blockers: event-context grounding still depends on other state-bearing sources
+    next_steps: add pathway neighborhood scoring into action derivation

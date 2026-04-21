@@ -1,0 +1,146 @@
+version: 1.0.0
+description: Alpha action ontology for COD weakly supervised action-family assignment.
+actions:
+  - action_id: ACT_NO_CONFIDENT_ASSIGNMENT
+    action_name: no_confident_action_assignment
+    parent_action_id: ACT_ABSTAIN
+    level_0: abstain
+    level_1: insufficient_direct_state
+    level_2: no_confident_action_assignment
+    zone: Z
+    description: No action family can be assigned confidently from the available public-open evidence.
+    required_evidence_types: [insufficient_direct_state]
+    allowed_output_patterns: [abstain]
+    known_pathway_links: []
+  - action_id: ACT_REGULATORY_HOMEOSTASIS
+    action_name: maintain_homeostatic_program
+    parent_action_id: ACT_REGULATORY
+    level_0: regulatory
+    level_1: homeostatic_control
+    level_2: maintain_homeostatic_program
+    zone: A
+    description: Preserve baseline transcriptional and epigenetic operating regime.
+    required_evidence_types: [baseline_expression, pathway_score]
+    allowed_output_patterns: [stable_transcriptome, low_stress_signature]
+    known_pathway_links: [Reactome:R-HSA-162582]
+  - action_id: ACT_SIGNALING_IFN_RESPONSE
+    action_name: activate_interferon_program
+    parent_action_id: ACT_SIGNALING
+    level_0: signaling
+    level_1: cytokine_response
+    level_2: activate_interferon_program
+    zone: B
+    description: Activate interferon-stimulated signaling and transcriptional response.
+    required_evidence_types: [ligand_exposure, STAT1_or_ISG_signature]
+    allowed_output_patterns: [up_ISG15, up_STAT1, inflammatory_secretome]
+    known_pathway_links: [Reactome:R-HSA-909733, KEGG:hsa05164]
+  - action_id: ACT_SIGNALING_IFN_SUPPRESSION
+    action_name: suppress_interferon_program
+    parent_action_id: ACT_SIGNALING
+    level_0: signaling
+    level_1: cytokine_response
+    level_2: suppress_interferon_program
+    zone: B
+    description: Reduce interferon-responsive signaling or its transcriptional downstream program.
+    required_evidence_types: [perturbation_context, down_ISG_signature]
+    allowed_output_patterns: [down_ISG15, down_STAT1, reduced_interferon_activity]
+    known_pathway_links: [Reactome:R-HSA-909733]
+  - action_id: ACT_SIGNALING_NFKB_IL6
+    action_name: activate_inflammatory_cytokine_program
+    parent_action_id: ACT_SIGNALING
+    level_0: signaling
+    level_1: inflammatory_program
+    level_2: activate_inflammatory_cytokine_program
+    zone: B
+    description: Activate NFkB-like inflammatory cytokine program with IL6/TNF/NFKBIA support.
+    required_evidence_types: [inflammatory_signature, cytokine_output]
+    allowed_output_patterns: [up_IL6, up_TNF, up_NFKBIA]
+    known_pathway_links: [Reactome:R-HSA-975871]
+  - action_id: ACT_METABOLIC_SHIFT
+    action_name: activate_metabolic_shift_program
+    parent_action_id: ACT_METABOLIC
+    level_0: metabolic
+    level_1: energy_program
+    level_2: activate_metabolic_shift_program
+    zone: C
+    description: Shift metabolic operating mode toward stress-linked glycolytic or altered energy usage.
+    required_evidence_types: [lactate_or_LDHA_signal, nutrient_context, metabolic_program_score]
+    allowed_output_patterns: [up_LDHA, high_lactate, altered_energy_program]
+    known_pathway_links: [KEGG:hsa00010]
+  - action_id: ACT_FATE_PROLIFERATION
+    action_name: enter_cell_cycle_or_proliferation_program
+    parent_action_id: ACT_FATE
+    level_0: fate
+    level_1: cell_cycle
+    level_2: enter_cell_cycle_or_proliferation_program
+    zone: F
+    description: Enter proliferative progression supported by cell-cycle transcript programs.
+    required_evidence_types: [cell_cycle_signature, MKI67_signal, proliferation_measure]
+    allowed_output_patterns: [up_MKI67, up_TOP2A, dna_replication_genes]
+    known_pathway_links: [Reactome:R-HSA-69242]
+  - action_id: ACT_FATE_QUIESCENCE
+    action_name: enter_quiescence_program
+    parent_action_id: ACT_FATE
+    level_0: fate
+    level_1: dormancy
+    level_2: enter_quiescence_program
+    zone: F
+    description: Transition into lower-proliferation, maintenance-biased state.
+    required_evidence_types: [low_cell_cycle, stress_or_niche_context]
+    allowed_output_patterns: [down_MKI67, low_translation]
+    known_pathway_links: [Reactome:R-HSA-2559583]
+  - action_id: ACT_MAINTENANCE_STRESS
+    action_name: activate_stress_response_program
+    parent_action_id: ACT_MAINTENANCE
+    level_0: maintenance
+    level_1: stress_response
+    level_2: activate_stress_response_program
+    zone: G
+    description: Activate integrated stress-response programs without direct death commitment.
+    required_evidence_types: [ATF4_or_DDIT3_signature, stress_context]
+    allowed_output_patterns: [up_DDIT3, up_ATF4, heat_shock_markers]
+    known_pathway_links: [Reactome:R-HSA-381042]
+  - action_id: ACT_MAINTENANCE_APOPTOSIS
+    action_name: activate_apoptosis_or_cell_death_program
+    parent_action_id: ACT_MAINTENANCE
+    level_0: maintenance
+    level_1: quality_control
+    level_2: activate_apoptosis_or_cell_death_program
+    zone: G
+    description: Commit to programmed cell death under damage or control pressure.
+    required_evidence_types: [death_signal, caspase_signature]
+    allowed_output_patterns: [reduced_viability, apoptotic_morphology]
+    known_pathway_links: [Reactome:R-HSA-109581]
+  - action_id: ACT_MAINTENANCE_DNA_REPAIR
+    action_name: activate_dna_damage_or_repair_program
+    parent_action_id: ACT_MAINTENANCE
+    level_0: maintenance
+    level_1: genome_integrity
+    level_2: activate_dna_damage_or_repair_program
+    zone: G
+    description: Activate DNA damage sensing and repair programs.
+    required_evidence_types: [damage_signature, repair_program_score]
+    allowed_output_patterns: [up_CDKN1A, up_GADD45A, repair_markers]
+    known_pathway_links: [Reactome:R-HSA-73894]
+  - action_id: ACT_FATE_DIFFERENTIATION
+    action_name: activate_differentiation_or_lineage_commitment_program
+    parent_action_id: ACT_FATE
+    level_0: fate
+    level_1: lineage_commitment
+    level_2: activate_differentiation_or_lineage_commitment_program
+    zone: F
+    description: Shift into a lineage-associated transcriptional commitment program.
+    required_evidence_types: [lineage_markers, differentiation_context]
+    allowed_output_patterns: [lineage_marker_shift, altered_identity_program]
+    known_pathway_links: [Reactome:R-HSA-211859]
+  - action_id: ACT_BEHAVIOR_MIGRATION
+    action_name: activate_migration_or_adhesion_program
+    parent_action_id: ACT_BEHAVIOR
+    level_0: behavior
+    level_1: motility
+    level_2: activate_migration_or_adhesion_program
+    zone: D
+    description: Increase motility, matrix engagement, or adhesion remodeling.
+    required_evidence_types: [matrix_or_migration_signature, microenvironment_context]
+    allowed_output_patterns: [up_VIM, up_ITGB1, matrix_remodeling]
+    known_pathway_links: [Reactome:R-HSA-1474244]

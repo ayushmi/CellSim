@@ -1,0 +1,19 @@
+{"code": "hca", "dataset": "Human Cell Atlas", "family": "baseline_state", "implemented": true}
+{"code": "gtex", "dataset": "GTEx", "family": "baseline_state", "implemented": false}
+{"code": "tabula_sapiens", "dataset": "Tabula Sapiens", "family": "baseline_state", "implemented": false}
+{"code": "encode", "dataset": "ENCODE", "family": "regulatory_logic", "implemented": true}
+{"code": "roadmap", "dataset": "Roadmap Epigenomics", "family": "regulatory_logic", "implemented": false}
+{"code": "trrust", "dataset": "TRRUST", "family": "regulatory_logic", "implemented": false}
+{"code": "perturb_seq", "dataset": "Perturb-seq", "family": "perturbation_response", "implemented": true}
+{"code": "lincs", "dataset": "LINCS", "family": "perturbation_response", "implemented": false}
+{"code": "depmap", "dataset": "DepMap", "family": "perturbation_response", "implemented": false}
+{"code": "recon3d", "dataset": "Recon3D", "family": "metabolism_feasibility", "implemented": false}
+{"code": "biomodels", "dataset": "BioModels", "family": "metabolism_feasibility", "implemented": false}
+{"code": "hmdb", "dataset": "HMDB", "family": "metabolism_feasibility", "implemented": false}
+{"code": "hubmap", "dataset": "HuBMAP", "family": "spatial_context", "implemented": true}
+{"code": "cellxgene", "dataset": "CELLxGENE", "family": "spatial_context", "implemented": true}
+{"code": "tcga", "dataset": "TCGA", "family": "clinical_outcomes", "implemented": true}
+{"code": "uk_biobank", "dataset": "UK Biobank", "family": "clinical_outcomes", "implemented": false}
+{"code": "reactome", "dataset": "Reactome", "family": "signaling_graph", "implemented": false}
+{"code": "kegg", "dataset": "KEGG", "family": "signaling_graph", "implemented": false}
+{"code": "omnipath", "dataset": "OmniPath", "family": "signaling_graph", "implemented": true}

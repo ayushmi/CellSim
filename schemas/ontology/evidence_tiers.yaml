@@ -1,0 +1,26 @@
+version: 1.0.0
+tiers:
+  - tier: 0
+    name: descriptive_observation
+    description: Observational state description without causal support.
+    allowed_claims: [state_description]
+  - tier: 1
+    name: association
+    description: Statistical association without intervention.
+    allowed_claims: [association, ranking_with_caution]
+  - tier: 2
+    name: quasi_causal
+    description: Matched or naturally contrasting observations with residual confounding risk.
+    allowed_claims: [directional_hypothesis, ranking_with_controls]
+  - tier: 3
+    name: perturbational_causal
+    description: Controlled perturbation with downstream change observed.
+    allowed_claims: [intervention_response, local_causal_effect]
+  - tier: 4
+    name: replicated_perturbational
+    description: Perturbational effect reproduced across contexts or studies.
+    allowed_claims: [robust_intervention_response, benchmark_positive]
+  - tier: 5
+    name: mechanistically_supported
+    description: Perturbational effect additionally supported by mechanism layers in COD.
+    allowed_claims: [mechanistically_grounded_policy_signal, high_confidence_benchmark]

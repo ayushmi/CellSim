@@ -1,0 +1,211 @@
+version: 1.0.0
+sources:
+  - dataset_family: baseline_state
+    dataset_name: Human Cell Atlas
+    raw_id_field: source_cell_id
+    required_fields: [study_id, source_sample_id, cell_type_label, tissue_label, t0_timestamp]
+    optional_fields: [subject_id, sex, age, disease_state, transcriptome, proteome, spatial_region_label]
+    output_entities: [cell, transcriptome_state, donor]
+    granularity: single_cell
+    time_support: cross_sectional
+    intervention_support: none
+    pairing_support: exact_cell
+    implemented: true
+  - dataset_family: baseline_state
+    dataset_name: GTEx
+    raw_id_field: source_sample_id
+    required_fields: [study_id, source_sample_id, tissue_label, t0_timestamp]
+    optional_fields: [subject_id, age, sex, transcriptome, genotype]
+    output_entities: [bulk_state, donor, tissue]
+    granularity: bulk_tissue
+    time_support: cross_sectional
+    intervention_support: none
+    pairing_support: pseudo_cell
+    implemented: true
+  - dataset_family: baseline_state
+    dataset_name: Tabula Sapiens
+    raw_id_field: source_cell_id
+    required_fields: [study_id, source_sample_id, cell_type_label, tissue_label, t0_timestamp]
+    optional_fields: [subject_id, transcriptome, metadata]
+    output_entities: [cell, transcriptome_state]
+    granularity: single_cell
+    time_support: cross_sectional
+    intervention_support: none
+    pairing_support: exact_cell
+    implemented: true
+  - dataset_family: regulatory_logic
+    dataset_name: ENCODE
+    raw_id_field: source_sample_id
+    required_fields: [study_id, assay_id, tissue_label, cell_type_label]
+    optional_fields: [chromatin_accessibility, tf_binding, enhancer_target_edges]
+    output_entities: [regulatory_feature, constraint_prior]
+    granularity: sample
+    time_support: sparse
+    intervention_support: none
+    pairing_support: exact_sample
+    implemented: true
+  - dataset_family: regulatory_logic
+    dataset_name: Roadmap Epigenomics
+    raw_id_field: source_sample_id
+    required_fields: [study_id, source_sample_id, tissue_label]
+    optional_fields: [methylation, histone_marks, chromatin_state]
+    output_entities: [epigenome_state, constraint_prior]
+    granularity: sample
+    time_support: sparse
+    intervention_support: none
+    pairing_support: probabilistic_context
+    implemented: true
+  - dataset_family: regulatory_logic
+    dataset_name: TRRUST
+    raw_id_field: interaction_id
+    required_fields: [tf_symbol, target_symbol, effect_direction]
+    optional_fields: [evidence_pubmed_ids]
+    output_entities: [regulatory_edge]
+    granularity: interaction
+    time_support: none
+    intervention_support: none
+    pairing_support: knowledge_graph
+    implemented: true
+  - dataset_family: perturbation_response
+    dataset_name: Perturb-seq
+    raw_id_field: source_cell_id
+    required_fields: [study_id, source_sample_id, source_cell_id, intervention_target_entity, intervention_direction]
+    optional_fields: [transcriptome, viability_measure, delta_t_to_output]
+    output_entities: [cell_transition, perturbation_response]
+    granularity: single_cell
+    time_support: short_horizon
+    intervention_support: genetic
+    pairing_support: exact_cell
+    implemented: true
+  - dataset_family: perturbation_response
+    dataset_name: LINCS
+    raw_id_field: signature_id
+    required_fields: [study_id, source_sample_id, intervention_target_entity, intervention_dose, intervention_duration]
+    optional_fields: [gene_signature, morphology_signature]
+    output_entities: [perturbation_signature, compound_response]
+    granularity: sample
+    time_support: short_horizon
+    intervention_support: chemical
+    pairing_support: exact_sample
+    implemented: true
+  - dataset_family: perturbation_response
+    dataset_name: DepMap
+    raw_id_field: profile_id
+    required_fields: [study_id, source_sample_id, cell_type_label]
+    optional_fields: [gene_dependency, viability_measure, mutation_profile]
+    output_entities: [dependency_profile, medium_horizon_outcome]
+    granularity: cell_line
+    time_support: medium_horizon
+    intervention_support: genetic
+    pairing_support: exact_sample
+    implemented: true
+  - dataset_family: metabolism_feasibility
+    dataset_name: Recon3D
+    raw_id_field: reaction_id
+    required_fields: [reaction_id, metabolite_ids, gene_rules]
+    optional_fields: [subsystem, bounds]
+    output_entities: [metabolic_constraint]
+    granularity: reaction
+    time_support: none
+    intervention_support: none
+    pairing_support: knowledge_graph
+    implemented: true
+  - dataset_family: metabolism_feasibility
+    dataset_name: BioModels
+    raw_id_field: model_id
+    required_fields: [model_id, species_or_pathway]
+    optional_fields: [parameters, simulation_context]
+    output_entities: [dynamic_constraint_model]
+    granularity: model
+    time_support: simulated
+    intervention_support: variable
+    pairing_support: knowledge_graph
+    implemented: true
+  - dataset_family: metabolism_feasibility
+    dataset_name: HMDB
+    raw_id_field: metabolite_id
+    required_fields: [metabolite_id, name]
+    optional_fields: [pathway_membership, biofluid_location]
+    output_entities: [metabolite_entity]
+    granularity: entity
+    time_support: none
+    intervention_support: none
+    pairing_support: registry
+    implemented: true
+  - dataset_family: spatial_context
+    dataset_name: HuBMAP
+    raw_id_field: source_sample_id
+    required_fields: [study_id, source_sample_id, tissue_label, spatial_region_label]
+    optional_fields: [coordinates, neighbor_context, niche_label]
+    output_entities: [spatial_state, neighborhood]
+    granularity: region_or_cell
+    time_support: cross_sectional
+    intervention_support: none
+    pairing_support: probabilistic_context
+    implemented: true
+  - dataset_family: spatial_context
+    dataset_name: CELLxGENE
+    raw_id_field: source_cell_id
+    required_fields: [study_id, source_sample_id, cell_type_label]
+    optional_fields: [transcriptome, embeddings, disease_state]
+    output_entities: [cell_state, embedding]
+    granularity: single_cell
+    time_support: cross_sectional
+    intervention_support: none
+    pairing_support: exact_cell
+    implemented: true
+  - dataset_family: clinical_outcomes
+    dataset_name: TCGA
+    raw_id_field: case_submitter_id
+    required_fields: [study_id, source_sample_id, disease_state]
+    optional_fields: [survival_proxy, therapy_response_label, mutation_profile]
+    output_entities: [patient_outcome, pseudo_cell_outcome]
+    granularity: patient
+    time_support: long_horizon
+    intervention_support: treatment_observed
+    pairing_support: probabilistic_context
+    implemented: true
+  - dataset_family: clinical_outcomes
+    dataset_name: UK Biobank
+    raw_id_field: participant_id
+    required_fields: [study_id, source_sample_id, phenotype]
+    optional_fields: [genotype, longitudinal_outcomes]
+    output_entities: [organism_outcome]
+    granularity: participant
+    time_support: longitudinal
+    intervention_support: observational
+    pairing_support: probabilistic_context
+    implemented: true
+  - dataset_family: signaling_graph
+    dataset_name: Reactome
+    raw_id_field: pathway_id
+    required_fields: [pathway_id, pathway_name]
+    optional_fields: [member_entities, upstream_downstream_edges]
+    output_entities: [pathway, graph_edge]
+    granularity: pathway
+    time_support: none
+    intervention_support: none
+    pairing_support: knowledge_graph
+    implemented: true
+  - dataset_family: signaling_graph
+    dataset_name: KEGG
+    raw_id_field: pathway_id
+    required_fields: [pathway_id, pathway_name]
+    optional_fields: [member_entities, reactions]
+    output_entities: [pathway, graph_edge]
+    granularity: pathway
+    time_support: none
+    intervention_support: none
+    pairing_support: knowledge_graph
+    implemented: false
+  - dataset_family: signaling_graph
+    dataset_name: OmniPath
+    raw_id_field: interaction_id
+    required_fields: [source_symbol, target_symbol, interaction_type]
+    optional_fields: [ligand_receptor, literature_support]
+    output_entities: [signaling_edge, ligand_field_prior]
+    granularity: interaction
+    time_support: none
+    intervention_support: none
+    pairing_support: knowledge_graph
+    implemented: true

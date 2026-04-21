@@ -1,0 +1,56 @@
+{
+  "action_distribution": {
+    "activate_inflammatory_cytokine_program": 1,
+    "activate_interferon_program": 1,
+    "increase_glycolysis": 1,
+    "maintain_homeostatic_program": 4,
+    "suppress_interferon_program": 1
+  },
+  "action_label_coverage": 8,
+  "benchmark_rows": 8,
+  "event_type_distribution": {
+    "context_event": 1,
+    "knowledge_support_event": 1,
+    "outcome_support_event": 1,
+    "state_event": 3,
+    "transition_event": 2
+  },
+  "events": 8,
+  "evidence_tier_distribution": {
+    "0": 4,
+    "1": 2,
+    "3": 2
+  },
+  "evidence_trace_rows": 27,
+  "fraction_with_expression_features": 0.625,
+  "fraction_with_outcomes": 0.125,
+  "fraction_with_perturbation_evidence": 0.25,
+  "pairing_status_distribution": {
+    "exact_cell": 4,
+    "exact_sample": 1,
+    "probabilistic_context": 3
+  },
+  "record_origin_distribution": {
+    "fixture": 8
+  },
+  "source_family_coverage": 6,
+  "sources": {
+    "ENCODE": 1,
+    "HuBMAP": 1,
+    "Human Cell Atlas": 2,
+    "OmniPath": 1,
+    "Perturb-seq": 2,
+    "TCGA": 1
+  },
+  "state_depth_distribution": {
+    "context_only": 2,
+    "outcome_bearing": 1,
+    "state_bearing": 3,
+    "transition_bearing": 2
+  },
+  "state_representation_distribution": {
+    "harmonized": 5,
+    "inferred": 2,
+    "normalized_measured": 1
+  }
+}

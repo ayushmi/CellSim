@@ -1,0 +1,2 @@
+{"feature_id": "lactate", "feature_name": "lactate", "feature_space_id": "metabolite_symbol", "profile_ref": "met:COD_CTE_00003", "provenance_ref": "trace:hca_002:metabolome:lactate", "support_score": 0.79, "unit": null, "value": 1.6, "value_type": "score"}
+{"feature_id": "lactate", "feature_name": "lactate", "feature_space_id": "metabolite_symbol", "profile_ref": "met:COD_CTE_00007", "provenance_ref": "trace:pseq_002:metabolome:lactate", "support_score": 0.85, "unit": null, "value": 1.9, "value_type": "score"}

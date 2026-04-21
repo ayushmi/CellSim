@@ -1,0 +1,24 @@
+version: 1.0.0
+random_seed: 7
+splits:
+  train_fraction: 0.7
+  val_fraction: 0.15
+  test_fraction: 0.15
+tasks:
+  - state_to_action
+  - state_plus_intervention_to_output
+  - held_out_source_family_generalization
+  - held_out_cell_type_generalization
+  - held_out_perturbation_generalization
+  - held_out_state_depth_generalization
+  - measured_vs_inferred_state_robustness
+baseline_models:
+  - majority_action
+  - source_family_majority_action
+  - state_depth_majority_action
+  - evidence_tier_majority_action
+evaluation_views:
+  held_out_source_families:
+    - signaling_graph
+  held_out_state_depths:
+    - transition_bearing

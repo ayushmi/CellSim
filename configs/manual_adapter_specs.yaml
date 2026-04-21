@@ -1,0 +1,32 @@
+version: 1.0.0
+adapters:
+  - adapter: tabula_sapiens_h5ad
+    status: partially implemented
+    input_type: local_h5ad
+    source_family: baseline_state
+    notes: Local h5ad adapter using the same marker-slice state extraction path as CELLxGENE.
+  - adapter: roadmap_metadata
+    status: partially implemented
+    input_type: local_tsv
+    source_family: regulatory_logic
+    notes: Local metadata adapter for Roadmap reference epigenomes.
+  - adapter: recon3d_sbml
+    status: partially implemented
+    input_type: local_sbml_xml
+    source_family: metabolism_feasibility
+    notes: Local SBML parser for reaction-level constraint events.
+  - adapter: hmdb_metabolites_xml
+    status: partially implemented
+    input_type: local_xml
+    source_family: metabolism_feasibility
+    notes: Local XML parser for HMDB metabolite registry subsets.
+  - adapter: kegg_local_tsv
+    status: controlled-data adapter implemented
+    input_type: local_tsv
+    source_family: signaling_graph
+    notes: User-supplied local KEGG exports only; no bundled fetch due licensing boundaries.
+  - adapter: ukb_tabular
+    status: controlled-data adapter implemented
+    input_type: local_tsv
+    source_family: clinical_outcomes
+    notes: Requires institutionally approved UK Biobank export tables.

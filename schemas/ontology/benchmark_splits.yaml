@@ -1,0 +1,34 @@
+version: 2.0.0
+description: COD 2.0 benchmark split policy for public-open builds.
+tasks:
+  - state_to_action
+  - state_plus_intervention_to_next_output
+  - state_plus_intervention_to_outcome
+  - held_out_generalization
+splits:
+  held_out_donors:
+    description: Entire normalized donor IDs excluded from training.
+    key: cod_subject_id
+    values: [THP1]
+  held_out_cell_types:
+    description: Cell Ontology labels held out to test cell-type transfer.
+    key: cell_type_label
+    values: [A549]
+  held_out_tissues:
+    description: Tissue contexts held out to test microenvironment transfer.
+    key: tissue_label
+    values: [colon]
+  held_out_interventions:
+    description: Intervention targets held out to test intervention transfer.
+    key: intervention_target_entity
+    values: [IFNGR1]
+  held_out_studies:
+    description: Entire studies held out to test study-level robustness.
+    key: source_study_id
+    values: [GSE153056]
+  compositional_ood:
+    description: Jointly unseen cell-type and intervention combinations.
+    keys: [cell_type_label, intervention_target_entity]
+    values:
+      - [A549, IFNGR1]
+      - [THP-1, JAK2]

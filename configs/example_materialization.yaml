@@ -1,0 +1,16 @@
+release_version: 0.1.0
+raw_dir: examples/raw
+output_dir: examples/output
+implemented_datasets:
+  - Human Cell Atlas
+  - Perturb-seq
+  - ENCODE
+  - HuBMAP
+  - TCGA
+  - OmniPath
+materialization:
+  export_jsonl: true
+  export_parquet: true
+  preserve_raw_ids: true
+  require_provenance_trace: true
+  explicit_missingness: true
