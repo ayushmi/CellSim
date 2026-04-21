@@ -2,7 +2,7 @@
 
 COD 1.0 ships default automated fetchers for public-open sources and manual/local adapters for sources that cannot be fetched deeply by default in an open repository.
 
-Available manual adapters live in [src/cod/manual_adapters.py](/Users/ayush/Development/PhysicalAI/CellSim/src/cod/manual_adapters.py) and are indexed in [configs/manual_adapter_specs.yaml](/Users/ayush/Development/PhysicalAI/CellSim/configs/manual_adapter_specs.yaml).
+Available manual adapters live in [src/cod/manual_adapters.py](src/cod/manual_adapters.py) and are indexed in [configs/manual_adapter_specs.yaml](configs/manual_adapter_specs.yaml).
 
 ## Supported Adapters
 

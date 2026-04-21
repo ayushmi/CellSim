@@ -7,7 +7,7 @@
 streamlit run ui/streamlit_app.py
 ```
 
-The app defaults to [`examples/output`](/Users/ayush/Development/PhysicalAI/CellSim/examples/output) and can also point at a real materialized run such as `data/materialized_real`.
+The app defaults to [`examples/output`](examples/output) and can also point at a real materialized run such as `data/materialized_real`.
 
 ## Views
 

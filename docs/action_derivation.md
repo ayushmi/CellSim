@@ -10,7 +10,7 @@ COD action derivation currently combines:
 
 ## Current mapper
 
-Implemented in [`src/cod/action_mapping.py`](/Users/ayush/Development/PhysicalAI/CellSim/src/cod/action_mapping.py).
+Implemented in [`src/cod/action_mapping.py`](src/cod/action_mapping.py).
 
 Current grounded rules include:
 

@@ -2,9 +2,9 @@
 
 This directory documents the ingestion surface for COD.
 
-- Contracts for all 19 source families live in [`schemas/contracts/source_family_contracts.yaml`](/Users/ayush/Development/PhysicalAI/CellSim/schemas/contracts/source_family_contracts.yaml).
-- Executable ingestion and materialization logic lives in [`src/cod/materialize.py`](/Users/ayush/Development/PhysicalAI/CellSim/src/cod/materialize.py).
-- Real public-subset acquisition lives in [`src/cod/acquisition.py`](/Users/ayush/Development/PhysicalAI/CellSim/src/cod/acquisition.py).
+- Contracts for all 19 source families live in [`schemas/contracts/source_family_contracts.yaml`](schemas/contracts/source_family_contracts.yaml).
+- Executable ingestion and materialization logic lives in [`src/cod/materialize.py`](src/cod/materialize.py).
+- Real public-subset acquisition lives in [`src/cod/acquisition.py`](src/cod/acquisition.py).
 - The first end-to-end subset currently wires `Human Cell Atlas`, `Perturb-seq`, `ENCODE`, `HuBMAP`, `TCGA`, and `OmniPath`.
 
 ## Commands

@@ -2,9 +2,9 @@
 
 COD currently carries several ontology layers:
 
-- action ontology: [`schemas/ontology/action_ontology.yaml`](/Users/ayush/Development/PhysicalAI/CellSim/schemas/ontology/action_ontology.yaml)
-- evidence tiers: [`schemas/ontology/evidence_tiers.yaml`](/Users/ayush/Development/PhysicalAI/CellSim/schemas/ontology/evidence_tiers.yaml)
-- benchmark splits: [`schemas/ontology/benchmark_splits.yaml`](/Users/ayush/Development/PhysicalAI/CellSim/schemas/ontology/benchmark_splits.yaml)
+- action ontology: [`schemas/ontology/action_ontology.yaml`](schemas/ontology/action_ontology.yaml)
+- evidence tiers: [`schemas/ontology/evidence_tiers.yaml`](schemas/ontology/evidence_tiers.yaml)
+- benchmark splits: [`schemas/ontology/benchmark_splits.yaml`](schemas/ontology/benchmark_splits.yaml)
 
 ## Entity harmonization
 

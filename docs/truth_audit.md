@@ -2,7 +2,7 @@
 
 ## Bottom line
 
-Before this upgrade, the repository used only bundled fixture files in [`examples/raw`](/Users/ayush/Development/PhysicalAI/CellSim/examples/raw). It did **not** download from true upstream public sources.
+Before this upgrade, the repository used only bundled fixture files in [`examples/raw`](examples/raw). It did **not** download from true upstream public sources.
 
 After this upgrade, the repository supports a separate `fetch-real` path for six public sources:
 

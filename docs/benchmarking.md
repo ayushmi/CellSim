@@ -1,6 +1,6 @@
 # Benchmarking
 
-COD benchmark preparation is driven by [`configs/benchmark_prep.yaml`](/Users/ayush/Development/PhysicalAI/CellSim/configs/benchmark_prep.yaml) and the CLI command:
+COD benchmark preparation is driven by [`configs/benchmark_prep.yaml`](configs/benchmark_prep.yaml) and the CLI command:
 
 ```bash
 python -m cod.cli benchmark-prep --input-dir data/materialized_real --output-dir benchmarks/real_public

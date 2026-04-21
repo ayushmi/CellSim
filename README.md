@@ -1,6 +1,6 @@
 # Cell Operating Dataset (COD)
 
-This repository is the first implementation of the **Cell Operating Dataset**, built directly from [`COD_research_manual_v3.md`](/Users/ayush/Development/PhysicalAI/CellSim/COD_research_manual_v3.md).
+This repository is the first implementation of the **Cell Operating Dataset**, built directly from [`COD_research_manual_v3.md`](COD_research_manual_v3.md).
 
 COD centers the **Cell Transition Event (CTE)** as the unit of record:
 
@@ -162,7 +162,7 @@ The Explorer is a read-only Streamlit app with:
 - `Data Quality`
 - `Build Comparison`
 
-See [`docs/explorer_demo.md`](/Users/ayush/Development/PhysicalAI/CellSim/docs/explorer_demo.md).
+See [`docs/explorer_demo.md`](docs/explorer_demo.md).
 
 ## Honest support boundaries
 
@@ -176,12 +176,12 @@ This first version does **not** pretend every dataset can be cell-joined exactly
 
 Important truthfulness notes:
 
-- [`examples/raw`](/Users/ayush/Development/PhysicalAI/CellSim/examples/raw) contains fixtures, not upstream downloads.
-- Real upstream acquisition status is documented in [`docs/truth_audit.md`](/Users/ayush/Development/PhysicalAI/CellSim/docs/truth_audit.md).
-- Per-source support is summarized in [`docs/source_support_matrix.md`](/Users/ayush/Development/PhysicalAI/CellSim/docs/source_support_matrix.md) and [`docs/source_support_matrix.json`](/Users/ayush/Development/PhysicalAI/CellSim/docs/source_support_matrix.json).
-- Complete implementation status is in [`docs/implementation_report.md`](/Users/ayush/Development/PhysicalAI/CellSim/docs/implementation_report.md).
-- COD 1.0 platform notes are in [`docs/cod_1_0_platform.md`](/Users/ayush/Development/PhysicalAI/CellSim/docs/cod_1_0_platform.md).
-- COD 2.0 platform notes are in [`docs/cod_2_0_platform.md`](/Users/ayush/Development/PhysicalAI/CellSim/docs/cod_2_0_platform.md).
-- Benchmark workflow notes are in [`docs/benchmarking.md`](/Users/ayush/Development/PhysicalAI/CellSim/docs/benchmarking.md).
-- Action derivation notes are in [`docs/action_derivation.md`](/Users/ayush/Development/PhysicalAI/CellSim/docs/action_derivation.md).
-- Manual and controlled adapters are documented in [`docs/manual_adapters.md`](/Users/ayush/Development/PhysicalAI/CellSim/docs/manual_adapters.md).
+- [`examples/raw`](examples/raw) contains fixtures, not upstream downloads.
+- Real upstream acquisition status is documented in [`docs/truth_audit.md`](docs/truth_audit.md).
+- Per-source support is summarized in [`docs/source_support_matrix.md`](docs/source_support_matrix.md) and [`docs/source_support_matrix.json`](docs/source_support_matrix.json).
+- Complete implementation status is in [`docs/implementation_report.md`](docs/implementation_report.md).
+- COD 1.0 platform notes are in [`docs/cod_1_0_platform.md`](docs/cod_1_0_platform.md).
+- COD 2.0 platform notes are in [`docs/cod_2_0_platform.md`](docs/cod_2_0_platform.md).
+- Benchmark workflow notes are in [`docs/benchmarking.md`](docs/benchmarking.md).
+- Action derivation notes are in [`docs/action_derivation.md`](docs/action_derivation.md).
+- Manual and controlled adapters are documented in [`docs/manual_adapters.md`](docs/manual_adapters.md).

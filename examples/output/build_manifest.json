@@ -12,7 +12,7 @@
   },
   "materialization_timestamp": "2026-04-20T16:06:36.840465+00:00",
   "ontology_version": "0.1.0",
-  "output_dir": "/Users/ayush/Development/PhysicalAI/CellSim/examples/output",
+  "output_dir": "examples/output",
   "schema_version": "0.2.0",
   "source_manifest_bundle": [],
   "source_support_matrix_version": "0.2.0",

@@ -1,6 +1,6 @@
 # Example Fixtures
 
-Files in [`examples/raw`](/Users/ayush/Development/PhysicalAI/CellSim/examples/raw) are **hand-curated fixtures** used for local development and testing.
+Files in [`examples/raw`](examples/raw) are **hand-curated fixtures** used for local development and testing.
 
 They are not direct upstream downloads.
 

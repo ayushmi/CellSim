@@ -20,8 +20,8 @@ COD 1.0 is the first truthful public-open platform release of the Cell Operating
 
 Reference build:
 
-- [data/materialized_cod10_public](/Users/ayush/Development/PhysicalAI/CellSim/data/materialized_cod10_public)
-- [benchmarks/cod10_public](/Users/ayush/Development/PhysicalAI/CellSim/benchmarks/cod10_public)
+- [data/materialized_cod10_public](data/materialized_cod10_public)
+- [benchmarks/cod10_public](benchmarks/cod10_public)
 
 Headline numbers:
 
