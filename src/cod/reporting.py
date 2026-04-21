@@ -20,6 +20,8 @@ def summarize_build(input_dir: Path) -> dict[str, Any]:
     signaling = _optional_jsonl(input_dir / "signaling_profiles.jsonl")
     source_family_distribution = events["source_family"].fillna("unknown").value_counts().to_dict() if "source_family" in events.columns else {}
     output_events = events[events["output_present_flag"].fillna(False)].copy() if "output_present_flag" in events.columns else events.iloc[0:0]
+    outcome_events = events[events["outcome_present_flag"].fillna(False)].copy() if "outcome_present_flag" in events.columns else events.iloc[0:0]
+    trajectory_events = events[events.get("trajectory_id", "").notna()].copy() if "trajectory_id" in events.columns else events.iloc[0:0]
     summary = {
         "events": int(len(events)),
         "sources": events["source_dataset"].value_counts().to_dict(),
@@ -42,6 +44,10 @@ def summarize_build(input_dir: Path) -> dict[str, Any]:
         "fraction_with_outcomes": float(events["outcome_present_flag"].mean()) if "outcome_present_flag" in events.columns and len(events) else 0.0,
         "fraction_with_outputs": float(events["output_present_flag"].mean()) if "output_present_flag" in events.columns and len(events) else 0.0,
         "output_type_distribution": output_events["output_type"].value_counts().to_dict() if "output_type" in output_events.columns else {},
+        "outcome_type_distribution": outcome_events["outcome_proxy_type"].fillna("observed_or_unspecified").value_counts().to_dict() if "outcome_proxy_type" in outcome_events.columns else {},
+        "trajectory_class_distribution": trajectory_events["trajectory_class"].value_counts().to_dict() if "trajectory_class" in trajectory_events.columns else {},
+        "trajectory_event_count": int(len(trajectory_events)),
+        "proxy_outcome_fraction": float(events["proxy_outcome_flag"].mean()) if "proxy_outcome_flag" in events.columns and len(events) else 0.0,
         "evidence_trace_rows": int(len(evidence)),
         "transcriptome_feature_rows": int(len(transcriptome)),
         "metabolome_feature_rows": int(len(metabolome)),
@@ -93,6 +99,9 @@ def write_data_quality_report(input_dir: Path, output_path: Path) -> dict[str, A
         "pairing_status_distribution": events["measurement_pairing_status"].value_counts().to_dict(),
         "action_confidence_distribution": events["action_confidence_score"].round(1).value_counts().sort_index().to_dict(),
         "expression_feature_count_distribution": events["expression_feature_count"].value_counts().sort_index().to_dict(),
+        "output_confidence_distribution": events["output_confidence_score"].round(1).value_counts().sort_index().to_dict() if "output_confidence_score" in events.columns else {},
+        "outcome_confidence_distribution": events["outcome_confidence_score"].round(1).value_counts().sort_index().to_dict() if "outcome_confidence_score" in events.columns else {},
+        "overall_plausibility_distribution": events["overall_plausibility_score"].dropna().round(1).value_counts().sort_index().to_dict() if "overall_plausibility_score" in events.columns else {},
         "missingness": {
             "outcome_present_fraction": float(events["outcome_present_flag"].mean()) if "outcome_present_flag" in events.columns else 0.0,
             "output_present_fraction": float(events["output_present_flag"].mean()) if "output_present_flag" in events.columns else 0.0,
@@ -144,6 +153,63 @@ def write_output_space_report(input_dir: Path, output_path: Path) -> dict[str, A
         "per_source_output_counts": output_events.groupby(["source_dataset", "output_type"]).size().reset_index(name="count").to_dict(orient="records") if len(output_events) else [],
         "per_state_depth_output_counts": output_events.groupby(["state_depth_category", "output_type"]).size().reset_index(name="count").to_dict(orient="records") if len(output_events) else [],
         "output_evidence_summary_examples": output_examples,
+    }
+    output_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
+    return report
+
+
+def write_outcome_space_report(input_dir: Path, output_path: Path) -> dict[str, Any]:
+    events = load_jsonl(input_dir / "cod_events.jsonl")
+    outcome_events = events[events["outcome_present_flag"].fillna(False)].copy() if "outcome_present_flag" in events.columns else events.iloc[0:0]
+    report = {
+        "outcome_event_count": int(len(outcome_events)),
+        "proxy_outcome_fraction": float(outcome_events["proxy_outcome_flag"].mean()) if len(outcome_events) and "proxy_outcome_flag" in outcome_events.columns else 0.0,
+        "outcome_horizon_distribution": outcome_events["outcome_horizon_type"].value_counts().to_dict() if "outcome_horizon_type" in outcome_events.columns else {},
+        "outcome_type_distribution": outcome_events["outcome_proxy_type"].fillna("observed_or_unspecified").value_counts().to_dict() if "outcome_proxy_type" in outcome_events.columns else {},
+        "per_source_outcome_counts": outcome_events.groupby(["source_dataset", "outcome_horizon_type"]).size().reset_index(name="count").to_dict(orient="records") if len(outcome_events) else [],
+        "per_state_depth_outcome_counts": outcome_events.groupby(["state_depth_category", "outcome_horizon_type"]).size().reset_index(name="count").to_dict(orient="records") if len(outcome_events) else [],
+    }
+    output_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
+    return report
+
+
+def write_trajectory_report(input_dir: Path, output_path: Path) -> dict[str, Any]:
+    events = load_jsonl(input_dir / "cod_events.jsonl")
+    trajectory_events = events[events["trajectory_id"].notna()].copy() if "trajectory_id" in events.columns else events.iloc[0:0]
+    report = {
+        "trajectory_event_count": int(len(trajectory_events)),
+        "trajectory_count": int(trajectory_events["trajectory_id"].nunique()) if len(trajectory_events) else 0,
+        "trajectory_class_distribution": trajectory_events["trajectory_class"].value_counts().to_dict() if "trajectory_class" in trajectory_events.columns else {},
+        "exact_vs_inferred_distribution": trajectory_events["exact_vs_inferred_trajectory_flag"].fillna(False).astype(str).value_counts().to_dict() if "exact_vs_inferred_trajectory_flag" in trajectory_events.columns else {},
+        "source_trajectory_counts": trajectory_events.groupby(["source_dataset", "trajectory_class"]).size().reset_index(name="count").to_dict(orient="records") if len(trajectory_events) else [],
+        "trajectory_examples": trajectory_events[["cod_event_id", "trajectory_id", "trajectory_position", "trajectory_length", "previous_event_ref", "next_event_ref"]].head(25).to_dict(orient="records") if len(trajectory_events) else [],
+    }
+    output_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
+    return report
+
+
+def write_plausibility_report(input_dir: Path, output_path: Path) -> dict[str, Any]:
+    events = load_jsonl(input_dir / "cod_events.jsonl")
+    score_cols = [
+        "regulatory_support_score",
+        "pathway_support_score",
+        "metabolic_support_score",
+        "viability_constraint_score",
+        "overall_plausibility_score",
+    ]
+    report = {
+        "unsupported_action_fraction": float(events["unsupported_action_flag"].mean()) if "unsupported_action_flag" in events.columns and len(events) else 0.0,
+        "evaluation_ready_fraction": float(events["evaluation_ready_flag"].mean()) if "evaluation_ready_flag" in events.columns and len(events) else 0.0,
+        "score_summary": {
+            column: {
+                "mean": float(events[column].dropna().mean()),
+                "count": int(events[column].dropna().shape[0]),
+            }
+            for column in score_cols
+            if column in events.columns and not events[column].dropna().empty
+        },
+        "unsupported_by_source": events.groupby("source_dataset")["unsupported_action_flag"].mean().round(4).to_dict() if "unsupported_action_flag" in events.columns and len(events) else {},
+        "plausibility_examples": events[["cod_event_id", "action_primary_label", "overall_plausibility_score", "unsupported_action_flag", "plausibility_evidence_summary"]].head(25).to_dict(orient="records") if len(events) else [],
     }
     output_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
     return report

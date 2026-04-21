@@ -87,6 +87,8 @@ def _task_quality_flags(
     leakage_scores: dict[str, float | None],
 ) -> dict[str, dict[str, Any]]:
     quality: dict[str, dict[str, Any]] = {}
+    plausibility_classes = set(merged["task_plausibility_classification"].dropna().tolist()) if "task_plausibility_classification" in merged.columns else set()
+    supported_classes = set(merged["task_action_supported_vs_unsupported"].dropna().tolist()) if "task_action_supported_vs_unsupported" in merged.columns else set()
     action_rows = task_counts["state_to_action"]
     source_majority = baselines.get("source_family_majority_action_accuracy")
     source_predictiveness = leakage_scores.get("source_family_predictiveness")
@@ -108,9 +110,44 @@ def _task_quality_flags(
         "status": "meaningful" if task_counts["state_plus_intervention_to_output"] >= 50 else "low_coverage",
         "reasons": ["insufficient_output_rows"] if task_counts["state_plus_intervention_to_output"] < 50 else [],
     }
+    proxy_only_outcomes = bool(
+        task_counts["state_plus_intervention_to_outcome"] > 0
+        and "proxy_outcome_flag" in merged.columns
+        and merged.loc[merged["task_state_intervention_to_outcome"].notna(), "proxy_outcome_flag"].fillna(False).all()
+    )
     quality["state_plus_intervention_to_outcome"] = {
-        "status": "unavailable" if task_counts["state_plus_intervention_to_outcome"] == 0 else "partial",
-        "reasons": ["no_valid_outcome_labels"] if task_counts["state_plus_intervention_to_outcome"] == 0 else [],
+        "status": "unavailable" if task_counts["state_plus_intervention_to_outcome"] == 0 else "proxy_only" if proxy_only_outcomes else "meaningful",
+        "reasons": ["no_valid_outcome_labels"] if task_counts["state_plus_intervention_to_outcome"] == 0 else ["proxy_outcomes_only"] if proxy_only_outcomes else [],
+    }
+    quality["next_step_transition"] = {
+        "status": "meaningful" if task_counts.get("next_step_transition", 0) >= 50 else "limited",
+        "reasons": ["insufficient_transition_rows"] if task_counts.get("next_step_transition", 0) < 50 else [],
+    }
+    quality["trajectory_step_prediction"] = {
+        "status": "meaningful" if task_counts.get("trajectory_step_prediction", 0) >= 50 else "limited",
+        "reasons": ["insufficient_trajectory_rows"] if task_counts.get("trajectory_step_prediction", 0) < 50 else [],
+    }
+    quality["plausibility_classification"] = {
+        "status": "meaningful" if task_counts.get("plausibility_classification", 0) >= 100 and len(plausibility_classes) > 1 else "limited",
+        "reasons": [
+            reason
+            for reason, active in [
+                ("insufficient_plausibility_rows", task_counts.get("plausibility_classification", 0) < 100),
+                ("single_class_labels", len(plausibility_classes) <= 1),
+            ]
+            if active
+        ],
+    }
+    quality["action_supported_vs_unsupported_classification"] = {
+        "status": "meaningful" if task_counts.get("action_supported_vs_unsupported", 0) >= 100 and len(supported_classes) > 1 else "limited",
+        "reasons": [
+            reason
+            for reason, active in [
+                ("insufficient_support_rows", task_counts.get("action_supported_vs_unsupported", 0) < 100),
+                ("single_class_labels", len(supported_classes) <= 1),
+            ]
+            if active
+        ],
     }
     return quality
 
@@ -129,6 +166,10 @@ def _validate_benchmark_consistency(merged: pd.DataFrame, events: pd.DataFrame) 
         invalid_action = merged.loc[~merged["benchmark_action_eligible"].fillna(False), "task_state_to_action"].notna().any()
         if invalid_action:
             raise ValueError("Action benchmark rows exist outside valid action eligibility")
+    if "benchmark_trajectory_eligible" in merged.columns:
+        invalid_trajectory = merged.loc[~merged["benchmark_trajectory_eligible"].fillna(False), "task_trajectory_step_prediction"].notna().any()
+        if invalid_trajectory:
+            raise ValueError("Trajectory benchmark rows exist outside valid trajectory eligibility")
 
 
 def prepare_benchmarks(input_dir: Path, output_dir: Path, config_path: Path) -> dict[str, Any]:
@@ -145,6 +186,11 @@ def prepare_benchmarks(input_dir: Path, output_dir: Path, config_path: Path) -> 
         "action_level_2",
         "action_confidence_score",
         "measurement_pairing_status",
+        "overall_plausibility_score",
+        "unsupported_action_flag",
+        "proxy_outcome_flag",
+        "trajectory_id",
+        "trajectory_class",
         "causal_evidence_tier",
         "state_depth_category",
         "event_type",
@@ -219,12 +265,20 @@ def prepare_benchmarks(input_dir: Path, output_dir: Path, config_path: Path) -> 
         "state_to_action": int(merged["task_state_to_action"].notna().sum()),
         "state_plus_intervention_to_output": int(merged["task_state_intervention_to_output"].notna().sum()),
         "state_plus_intervention_to_outcome": int(merged["task_state_intervention_to_outcome"].notna().sum()),
+        "next_step_transition": int(merged["task_next_step_transition"].notna().sum()) if "task_next_step_transition" in merged.columns else 0,
+        "trajectory_step_prediction": int(merged["task_trajectory_step_prediction"].notna().sum()) if "task_trajectory_step_prediction" in merged.columns else 0,
+        "plausibility_classification": int(merged["task_plausibility_classification"].notna().sum()) if "task_plausibility_classification" in merged.columns else 0,
+        "action_supported_vs_unsupported": int(merged["task_action_supported_vs_unsupported"].notna().sum()) if "task_action_supported_vs_unsupported" in merged.columns else 0,
     }
     requested_tasks = set(cfg.get("tasks", []))
     task_requirements = {
         "state_to_action": task_counts["state_to_action"] > 0,
         "state_plus_intervention_to_output": task_counts["state_plus_intervention_to_output"] > 0,
         "state_plus_intervention_to_outcome": task_counts["state_plus_intervention_to_outcome"] > 0,
+        "next_step_transition": task_counts["next_step_transition"] > 0,
+        "trajectory_step_prediction": task_counts["trajectory_step_prediction"] > 0,
+        "plausibility_classification": task_counts["plausibility_classification"] > 0,
+        "action_supported_vs_unsupported_classification": task_counts["action_supported_vs_unsupported"] > 0,
     }
     invalid_requested_tasks = sorted(
         task_name for task_name, is_available in task_requirements.items() if task_name in requested_tasks and not is_available

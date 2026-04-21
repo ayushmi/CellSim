@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from cod.benchmarks import prepare_benchmarks
+from cod.evaluation import evaluate_predictions
 from cod.materialize import materialize_cod
 from cod.reporting import summarize_build, validate_build_consistency, write_output_space_report
 from cod.source_support import generate_support_matrix_markdown, load_source_support
@@ -79,3 +80,24 @@ def test_output_space_report_serializes_missing_output_evidence_cleanly(tmp_path
     report = write_output_space_report(materialized, tmp_path / "output_space_report.json")
     assert "output_evidence_summary_examples" in report
     assert all("NaN" not in str(example) for example in report["output_evidence_summary_examples"])
+
+
+def test_benchmark_and_evaluation_reports_include_cod3_tasks(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[1]
+    materialized = tmp_path / "materialized"
+    materialize_cod(root=root, raw_dir=root / "examples" / "raw", output_dir=materialized)
+    report = prepare_benchmarks(
+        input_dir=materialized,
+        output_dir=tmp_path / "benchmarks",
+        config_path=root / "configs" / "benchmark_prep.yaml",
+    )
+    assert "next_step_transition" in report["task_quality_flags"]
+    predictions = tmp_path / "predictions.jsonl"
+    first_event_id = next((materialized / "cod_events.jsonl").open("r", encoding="utf-8")).split('"cod_event_id": "')[1].split('"', 1)[0]
+    predictions.write_text(
+        '{"cod_event_id": "%s", "proposed_action": "maintain_homeostatic_program", "confidence": 0.5}\n' % first_event_id,
+        encoding="utf-8",
+    )
+    eval_report = evaluate_predictions(materialized, predictions, tmp_path / "evaluation")
+    assert "metrics" in eval_report
+    assert "failure_taxonomy_distribution" in eval_report

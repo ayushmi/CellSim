@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -26,6 +27,9 @@ def render_overview(bundle: dict[str, pd.DataFrame]) -> None:
     build_manifest = bundle["build_manifest"]
     summary_stats = bundle.get("summary_stats", {})
     output_space_report = bundle.get("output_space_report", {})
+    outcome_space_report = bundle.get("outcome_space_report", {})
+    trajectory_report = bundle.get("trajectory_report", {})
+    evaluation_report = bundle.get("evaluation_report", {})
     st.header("Overview")
     a, b, c, d = st.columns(4)
     a.metric("Total events", len(events))
@@ -37,6 +41,9 @@ def render_overview(bundle: dict[str, pd.DataFrame]) -> None:
     f.metric("Outcome-present events", int(events["outcome_present_flag"].sum()) if "outcome_present_flag" in events.columns else 0)
     g.metric("Expression-feature fraction", f"{summary_stats.get('fraction_with_expression_features', 0.0):.1%}")
     h.metric("Perturbation-evidence fraction", f"{summary_stats.get('fraction_with_perturbation_evidence', 0.0):.1%}")
+    i, j = st.columns(2)
+    i.metric("Trajectory events", summary_stats.get("trajectory_event_count", 0))
+    j.metric("Evaluation runs loaded", 1 if evaluation_report else 0)
 
     st.subheader("Source family coverage")
     st.dataframe(events.groupby(["source_family", "source_dataset"]).size().reset_index(name="count"), use_container_width=True)
@@ -60,6 +67,11 @@ def render_overview(bundle: dict[str, pd.DataFrame]) -> None:
         st.bar_chart(events["causal_evidence_tier"].value_counts().sort_index())
         st.subheader("State-depth distribution")
         st.bar_chart(events["state_depth_category"].value_counts())
+        if outcome_space_report:
+            st.subheader("Outcome types")
+            outcome_types = pd.Series(outcome_space_report.get("outcome_type_distribution", {}))
+            if not outcome_types.empty:
+                st.bar_chart(outcome_types)
     with right:
         st.subheader("Benchmark split counts")
         split_rows = pd.DataFrame(
@@ -75,6 +87,9 @@ def render_overview(bundle: dict[str, pd.DataFrame]) -> None:
         st.dataframe(events["record_origin_type"].value_counts().reset_index(name="count"), use_container_width=True)
         st.subheader("Event types")
         st.dataframe(events["event_type"].value_counts().reset_index(name="count"), use_container_width=True)
+        if trajectory_report:
+            st.subheader("Trajectory classes")
+            st.dataframe(pd.Series(trajectory_report.get("trajectory_class_distribution", {})).reset_index(name="count"), use_container_width=True)
 
     st.subheader("Missingness summary")
     st.dataframe(summarize_missingness(events), use_container_width=True)
@@ -96,6 +111,10 @@ def render_event_explorer(bundle: dict[str, pd.DataFrame]) -> None:
     pairing = st.multiselect("Pairing status", sorted(events["measurement_pairing_status"].dropna().unique()))
     state_repr = st.multiselect("State representation", sorted(events["state_representation_type"].dropna().unique()))
     evidence_tiers = st.multiselect("Evidence tier", sorted(events["causal_evidence_tier"].dropna().unique()))
+    trajectory_membership = st.selectbox("Trajectory membership", ["all", "trajectory_only", "non_trajectory"])
+    outcome_membership = st.selectbox("Outcome membership", ["all", "outcome_only", "non_outcome"])
+    proxy_outcome = st.selectbox("Proxy outcome", ["all", "proxy_only", "non_proxy"])
+    plausibility_floor = st.slider("Minimum plausibility", 0.0, 1.0, 0.0, 0.05)
     min_confidence = st.slider("Minimum action confidence", 0.0, 1.0, 0.0, 0.05)
     benchmark_only = st.checkbox("Benchmark rows only", value=False)
 
@@ -108,6 +127,20 @@ def render_event_explorer(bundle: dict[str, pd.DataFrame]) -> None:
         filtered = filtered[filtered["event_type"].isin(event_type)]
     if state_repr:
         filtered = filtered[filtered["state_representation_type"].isin(state_repr)]
+    if trajectory_membership == "trajectory_only":
+        filtered = filtered[filtered["trajectory_id"].notna()]
+    elif trajectory_membership == "non_trajectory":
+        filtered = filtered[filtered["trajectory_id"].isna()]
+    if outcome_membership == "outcome_only":
+        filtered = filtered[filtered["outcome_present_flag"].fillna(False)]
+    elif outcome_membership == "non_outcome":
+        filtered = filtered[~filtered["outcome_present_flag"].fillna(False)]
+    if proxy_outcome == "proxy_only":
+        filtered = filtered[filtered["proxy_outcome_flag"].fillna(False)]
+    elif proxy_outcome == "non_proxy":
+        filtered = filtered[~filtered["proxy_outcome_flag"].fillna(False)]
+    if "overall_plausibility_score" in filtered.columns:
+        filtered = filtered[filtered["overall_plausibility_score"].fillna(0.0) >= plausibility_floor]
     st.dataframe(
         filtered[
             [
@@ -123,6 +156,9 @@ def render_event_explorer(bundle: dict[str, pd.DataFrame]) -> None:
                 "causal_evidence_tier",
                 "action_confidence_score",
                 "measurement_pairing_status",
+                "outcome_present_flag",
+                "trajectory_id",
+                "overall_plausibility_score",
             ]
         ],
         use_container_width=True,
@@ -160,6 +196,10 @@ def render_event_detail(bundle: dict[str, pd.DataFrame]) -> None:
             "pre_state_ref", "post_state_ref", "state_representation_type", "measured_state_flag",
             "harmonized_state_flag", "inferred_state_flag", "probabilistic_linkage_flag",
         ],
+        "Trajectory": [
+            "trajectory_id", "trajectory_class", "trajectory_position", "trajectory_length",
+            "previous_event_ref", "next_event_ref", "exact_vs_inferred_trajectory_flag",
+        ],
         "Action": [
             "action_level_0", "action_level_1", "action_level_2", "action_primary_label", "action_directionality",
             "action_zone", "action_assignment_method", "action_derivation_version", "action_confidence_score", "action_candidate_labels", "action_evidence_summary",
@@ -167,11 +207,15 @@ def render_event_detail(bundle: dict[str, pd.DataFrame]) -> None:
         "Short-Horizon Outputs": [
             "short_horizon_output_ref", "differential_expression_signature_ref", "differential_protein_signature_ref",
             "differential_metabolite_signature_ref", "secretome_signature_ref", "morphology_signature_ref",
-            "viability_measure", "proliferation_measure", "output_type", "output_evidence_summary", "output_confidence_score",
+            "viability_measure", "proliferation_measure", "output_type", "output_horizon_type", "output_evidence_summary", "output_confidence_score",
         ],
         "Long-Horizon Outcomes": [
             "long_horizon_outcome_ref", "fate_outcome_label", "tissue_outcome_label", "therapy_response_label",
-            "disease_progression_label", "survival_proxy", "outcome_time_horizon", "outcome_confidence_score",
+            "disease_progression_label", "survival_proxy", "outcome_time_horizon", "outcome_horizon_type", "proxy_outcome_flag", "outcome_proxy_type", "outcome_confidence_score",
+        ],
+        "Plausibility": [
+            "regulatory_support_score", "pathway_support_score", "metabolic_support_score", "viability_constraint_score",
+            "overall_plausibility_score", "unsupported_action_flag", "plausibility_evidence_summary", "evaluation_ready_flag",
         ],
         "Reward Context": [
             "reward_context_label", "candidate_reward_variables_ref", "fitness_proxy_score",
@@ -223,6 +267,9 @@ def render_benchmark_explorer(bundle: dict[str, pd.DataFrame]) -> None:
     if bundle.get("baseline_report"):
         st.subheader("Baseline results")
         st.json(bundle["baseline_report"], expanded=False)
+    if bundle.get("evaluation_report"):
+        st.subheader("Latest evaluation report")
+        st.json(bundle["evaluation_report"], expanded=False)
     st.subheader("Split counts")
     split_df = pd.DataFrame(
         [
@@ -263,6 +310,15 @@ def render_build_info(bundle: dict[str, pd.DataFrame]) -> None:
     if bundle.get("output_space_report"):
         st.subheader("Output-space report")
         st.json(bundle["output_space_report"], expanded=False)
+    if bundle.get("outcome_space_report"):
+        st.subheader("Outcome-space report")
+        st.json(bundle["outcome_space_report"], expanded=False)
+    if bundle.get("trajectory_report"):
+        st.subheader("Trajectory report")
+        st.json(bundle["trajectory_report"], expanded=False)
+    if bundle.get("plausibility_report"):
+        st.subheader("Plausibility report")
+        st.json(bundle["plausibility_report"], expanded=False)
     if bundle.get("data_quality_report"):
         st.subheader("Data-quality report")
         st.json(bundle["data_quality_report"], expanded=False)
@@ -270,7 +326,7 @@ def render_build_info(bundle: dict[str, pd.DataFrame]) -> None:
 
 def render_build_comparison(bundle: dict[str, pd.DataFrame]) -> None:
     st.header("Build Comparison")
-    default_compare = ROOT / "data" / "materialized_cod10_public"
+    default_compare = ROOT / "data" / "materialized_cod2_public"
     compare_dir = Path(st.text_input("Comparison build directory", str(default_compare)))
     if not compare_dir.exists():
         st.info("Comparison directory not found.")
@@ -287,6 +343,8 @@ def render_build_comparison(bundle: dict[str, pd.DataFrame]) -> None:
         "benchmark_outcome_rows",
         "fraction_with_expression_features",
         "fraction_with_outputs",
+        "trajectory_event_count",
+        "proxy_outcome_fraction",
     ]:
         rows.append({"metric": key, "current": current.get(key), "comparison": previous.get(key)})
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
@@ -310,8 +368,102 @@ def render_data_quality(bundle: dict[str, pd.DataFrame]) -> None:
         if "output_confidence_score" in events.columns:
             st.subheader("Output confidence")
             st.bar_chart(events["output_confidence_score"].dropna().round(1).value_counts().sort_index())
+        if "overall_plausibility_score" in events.columns:
+            st.subheader("Plausibility score")
+            st.bar_chart(events["overall_plausibility_score"].dropna().round(1).value_counts().sort_index())
         st.subheader("Record origin distribution")
         st.bar_chart(events["record_origin_type"].value_counts())
+
+
+def render_trajectory_explorer(bundle: dict[str, pd.DataFrame]) -> None:
+    events = bundle["events"]
+    st.header("Trajectory Explorer")
+    trajectory_events = events[events["trajectory_id"].notna()].copy() if "trajectory_id" in events.columns else events.iloc[0:0]
+    if trajectory_events.empty:
+        st.info("No trajectory-aware events found in this build.")
+        return
+    trajectory_ids = sorted(trajectory_events["trajectory_id"].dropna().unique().tolist())
+    selected = st.selectbox("Trajectory", trajectory_ids)
+    subset = trajectory_events[trajectory_events["trajectory_id"] == selected].sort_values(["trajectory_position", "cod_event_id"])
+    st.dataframe(
+        subset[
+            [
+                "cod_event_id",
+                "source_dataset",
+                "cell_type_label",
+                "intervention_target_entity",
+                "trajectory_class",
+                "trajectory_position",
+                "trajectory_length",
+                "previous_event_ref",
+                "next_event_ref",
+            ]
+        ],
+        use_container_width=True,
+        hide_index=True,
+    )
+
+
+def render_outcome_explorer(bundle: dict[str, pd.DataFrame]) -> None:
+    events = bundle["events"]
+    st.header("Outcome Explorer")
+    outcome_events = events[events["outcome_present_flag"].fillna(False)].copy() if "outcome_present_flag" in events.columns else events.iloc[0:0]
+    if outcome_events.empty:
+        st.info("No outcome-bearing rows are available in this build.")
+        return
+    st.dataframe(
+        outcome_events[
+            [
+                "cod_event_id",
+                "source_dataset",
+                "event_type",
+                "state_depth_category",
+                "outcome_horizon_type",
+                "proxy_outcome_flag",
+                "outcome_proxy_type",
+                "therapy_response_label",
+                "outcome_confidence_score",
+            ]
+        ],
+        use_container_width=True,
+        hide_index=True,
+    )
+
+
+def render_plausibility_explorer(bundle: dict[str, pd.DataFrame]) -> None:
+    events = bundle["events"]
+    st.header("Constraint / Plausibility Explorer")
+    st.dataframe(
+        events[
+            [
+                "cod_event_id",
+                "source_dataset",
+                "action_primary_label",
+                "regulatory_support_score",
+                "pathway_support_score",
+                "metabolic_support_score",
+                "viability_constraint_score",
+                "overall_plausibility_score",
+                "unsupported_action_flag",
+            ]
+        ].sort_values("overall_plausibility_score", ascending=True),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+
+def render_evaluation_explorer(bundle: dict[str, pd.DataFrame]) -> None:
+    st.header("Evaluation Explorer")
+    default_eval = ROOT / "benchmarks" / "cod3_public" / "evaluation_latest" / "evaluation_report.json"
+    eval_path = Path(st.text_input("Evaluation report path", str(default_eval)))
+    if eval_path.exists():
+        st.subheader("Evaluation report")
+        st.json(json.loads(eval_path.read_text(encoding="utf-8")), expanded=False)
+    elif bundle.get("evaluation_report"):
+        st.subheader("Latest evaluation report")
+        st.json(bundle["evaluation_report"], expanded=False)
+    else:
+        st.info("No evaluation report loaded. Run `python -m cod.cli evaluate-predictions` and point this page at the generated report.")
 
 
 def main() -> None:
@@ -326,7 +478,7 @@ def main() -> None:
 
     page = st.sidebar.radio(
         "View",
-        ["Overview", "Event Explorer", "Event Detail", "Source Browser", "Ontology Browser", "Benchmark Explorer", "Data Quality", "Build / Version", "Build Comparison"],
+        ["Overview", "Event Explorer", "Event Detail", "Trajectory Explorer", "Outcome Explorer", "Constraint / Plausibility Explorer", "Evaluation Explorer", "Source Browser", "Ontology Browser", "Benchmark Explorer", "Data Quality", "Build / Version", "Build Comparison"],
     )
 
     if page == "Overview":
@@ -335,6 +487,14 @@ def main() -> None:
         render_event_explorer(bundle)
     elif page == "Event Detail":
         render_event_detail(bundle)
+    elif page == "Trajectory Explorer":
+        render_trajectory_explorer(bundle)
+    elif page == "Outcome Explorer":
+        render_outcome_explorer(bundle)
+    elif page == "Constraint / Plausibility Explorer":
+        render_plausibility_explorer(bundle)
+    elif page == "Evaluation Explorer":
+        render_evaluation_explorer(bundle)
     elif page == "Source Browser":
         render_source_support(bundle)
     elif page == "Ontology Browser":

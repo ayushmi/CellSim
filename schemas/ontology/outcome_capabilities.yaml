@@ -1,0 +1,78 @@
+version: 3.0.0
+sources:
+  - source_name: Human Cell Atlas
+    source_family: baseline_state
+    outcome_capability: unavailable
+    notes: baseline state atlas only in the current public-open path
+  - source_name: GTEx
+    source_family: baseline_state
+    outcome_capability: unavailable
+    notes: healthy bulk reference only
+  - source_name: Tabula Sapiens
+    source_family: baseline_state
+    outcome_capability: unavailable
+    notes: manual atlas adapter only
+  - source_name: ENCODE
+    source_family: regulatory_logic
+    outcome_capability: unavailable
+    notes: regulatory feasibility support, not direct outcome observation
+  - source_name: Roadmap Epigenomics
+    source_family: regulatory_logic
+    outcome_capability: unavailable
+    notes: contextual chromatin support only
+  - source_name: TRRUST
+    source_family: regulatory_logic
+    outcome_capability: unavailable
+    notes: regulatory graph support only
+  - source_name: Perturb-seq
+    source_family: perturbation_response
+    outcome_capability: unavailable
+    notes: strong short-horizon response, no durable public-open outcome labels in current path
+  - source_name: LINCS
+    source_family: perturbation_response
+    outcome_capability: unavailable
+    notes: short-horizon perturbational output only in current path
+  - source_name: DepMap
+    source_family: perturbation_response
+    outcome_capability: proxy_only
+    notes: viability-like proxy outcomes from dependency scores
+  - source_name: Recon3D
+    source_family: metabolism_feasibility
+    outcome_capability: unavailable
+    notes: mechanistic feasibility only
+  - source_name: BioModels
+    source_family: metabolism_feasibility
+    outcome_capability: simulated_only
+    notes: model metadata integrated; simulation outcomes not executed by default
+  - source_name: HMDB
+    source_family: metabolism_feasibility
+    outcome_capability: unavailable
+    notes: metabolite registry only
+  - source_name: HuBMAP
+    source_family: spatial_context
+    outcome_capability: unavailable
+    notes: spatial context only
+  - source_name: CELLxGENE
+    source_family: spatial_context
+    outcome_capability: unavailable
+    notes: state-bearing atlas, not interventional outcome
+  - source_name: TCGA
+    source_family: clinical_outcomes
+    outcome_capability: weak_context
+    notes: public-open path provides weak clinical context but not valid intervention-linked outcomes
+  - source_name: UK Biobank
+    source_family: clinical_outcomes
+    outcome_capability: controlled_access_potential
+    notes: high-value outcome source, controlled path only
+  - source_name: Reactome
+    source_family: signaling_graph
+    outcome_capability: unavailable
+    notes: pathway prior only
+  - source_name: KEGG
+    source_family: signaling_graph
+    outcome_capability: unavailable
+    notes: pathway prior only
+  - source_name: OmniPath
+    source_family: signaling_graph
+    outcome_capability: unavailable
+    notes: signaling prior only

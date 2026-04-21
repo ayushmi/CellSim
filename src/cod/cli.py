@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .acquisition import copy_fixture_raw, fetch_real_public_subset
 from .benchmarks import prepare_benchmarks
+from .evaluation import evaluate_predictions
 from .materialize import materialize_cod
 from .manual_adapters import ADAPTER_FUNCTIONS
 from .models import CellTransitionEvent
@@ -60,6 +61,11 @@ def main() -> None:
     benchmark_parser.add_argument("--input-dir", default="examples/output")
     benchmark_parser.add_argument("--output-dir", default="benchmarks/example")
     benchmark_parser.add_argument("--config", default="configs/benchmark_prep.yaml")
+
+    evaluation_parser = subparsers.add_parser("evaluate-predictions", help="Score an external model prediction file against COD")
+    evaluation_parser.add_argument("--input-dir", default="examples/output")
+    evaluation_parser.add_argument("--predictions", required=True)
+    evaluation_parser.add_argument("--output-dir", default="evaluations/example")
 
     report_parser = subparsers.add_parser("report-build", help="Generate summary stats for a materialized build")
     report_parser.add_argument("--input-dir", default="examples/output")
@@ -117,6 +123,13 @@ def main() -> None:
         print(json_path)
     elif args.command == "benchmark-prep":
         report = prepare_benchmarks(input_dir=root / args.input_dir, output_dir=root / args.output_dir, config_path=root / args.config)
+        print(json.dumps(report, indent=2, sort_keys=True))
+    elif args.command == "evaluate-predictions":
+        report = evaluate_predictions(
+            input_dir=root / args.input_dir,
+            predictions_path=root / args.predictions,
+            output_dir=root / args.output_dir,
+        )
         print(json.dumps(report, indent=2, sort_keys=True))
     elif args.command == "report-build":
         output = root / args.output if args.output else (root / args.input_dir / "summary_stats.json")

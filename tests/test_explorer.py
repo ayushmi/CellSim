@@ -21,8 +21,8 @@ def test_summary_helpers_return_rows() -> None:
     benchmark_counts = benchmark_task_counts(bundle["benchmarks"])
 
     assert len(missingness) > 0
-    assert set(benchmark_counts["task"]) == {
+    assert {
         "state_to_action",
         "state_plus_intervention_to_output",
         "state_plus_intervention_to_outcome",
-    }
+    }.issubset(set(benchmark_counts["task"]))

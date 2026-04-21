@@ -1,0 +1,59 @@
+sources:
+  hca:
+    catalog: dcp58
+    organ: lung
+    size: 20
+  gtex:
+    sample_attributes_url: https://storage.googleapis.com/adult-gtex/annotations/v8/metadata-files/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt
+    median_tpm_url: https://storage.googleapis.com/adult-gtex/bulk-gex/v8/rna-seq/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_median_tpm.gct.gz
+    tissues: [Lung, Whole Blood, Liver, Kidney - Cortex, Skin - Sun Exposed (Lower leg), Colon - Transverse, Muscle - Skeletal, Artery - Aorta, Pancreas, Spleen]
+    marker_genes: [ALB, KRT19, EPCAM, COL1A1, DCN, VWF, KDR, PTPRC, IL6, CXCL8, STAT1, IFIT1, MKI67, LDHA]
+    size: 10
+  cellxgene:
+    dataset_id: 0895c838-e550-48a3-a777-dbcd35d30272
+    collection_name: Single-Cell, Single-Nucleus, and Spatial RNA Sequencing of the Human Liver Identifies Cholangiocyte and Mesenchymal Heterogeneity
+    dataset_url: https://datasets.cellxgene.cziscience.com/85954cff-a901-4de2-bd7f-a23b0077812b.h5ad
+    marker_genes: [ALB, KRT19, EPCAM, COL1A1, COL1A2, DCN, VWF, KDR, EMCN, PTPRC, IL6, CXCL8, TNF, NFKBIA, STAT1, IFIT1, MKI67]
+    size: 146
+  encode:
+    assay_title: ATAC-seq
+    size: 20
+  perturb_seq:
+    metadata_url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE153nnn/GSE153056/suppl/GSE153056_ECCITE_metadata.tsv.gz
+    raw_tar_url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE153nnn/GSE153056/suppl/GSE153056_RAW.tar
+    include_expression: true
+    count_member: GSM4633614_ECCITE_cDNA_counts.tsv.gz
+    marker_genes: [STAT1, ISG15, IFIT1, IFIT3, CXCL10, IL6, TNF, NFKBIA, MKI67, TOP2A, LDHA]
+    size: 3200
+  lincs:
+    level2_matrix_url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE70nnn/GSE70138/suppl/GSE70138_Broad_LINCS_Level2_GEX_n113012x978_2015-12-31.gct.gz
+    cell_info_url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE70nnn/GSE70138/suppl/GSE70138_Broad_LINCS_cell_info_2017-04-28.txt.gz
+    pert_info_url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE70nnn/GSE70138/suppl/GSE70138_Broad_LINCS_pert_info_2017-03-06.txt.gz
+    cell_ids: ["*"]
+    marker_genes: [STAT1, IFIT1, CXCL10, IL6, TNF, NFKBIA, MKI67, TOP2A, LDHA, SLC2A1]
+    min_abs_delta: 0.2
+    size: 1800
+  depmap:
+    sample_info_url: https://ndownloader.figshare.com/files/26030696
+    dependency_url: https://ndownloader.figshare.com/files/26030681
+    expression_url: https://ndownloader.figshare.com/files/26030687
+    dependency_priority_genes: [BCL2, MYC, EGFR, CDK4, KRAS, STAT3]
+    marker_genes: [STAT1, IFIT1, IL6, TNF, NFKBIA, MKI67, TOP2A, LDHA, EPCAM, VIM]
+    release_info: DepMap_Pediatric_20Q1
+    size: 178
+  hubmap:
+    dataset_type: CODEX
+    size: 20
+  tcga:
+    project_id: TCGA-LUAD
+    size: 20
+  trrust:
+    human_url: https://www.grnpedia.org/trrust/data/trrust_rawdata.human.tsv
+    size: 100
+  reactome:
+    size: 50
+  biomodels:
+    query: MAPK
+    size: 25
+  omnipath:
+    size: 100

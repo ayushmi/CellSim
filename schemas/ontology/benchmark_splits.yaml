@@ -1,5 +1,5 @@
-version: 2.0.0
-description: COD 2.0 benchmark split policy for public-open builds.
+version: 3.0.0
+description: COD 3.0 benchmark split policy for public-open builds.
 tasks:
   - state_to_action
   - state_plus_intervention_to_next_output

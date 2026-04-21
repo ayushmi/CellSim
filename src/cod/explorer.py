@@ -38,6 +38,9 @@ def load_explorer_bundle(root: Path, data_dir: Path) -> dict[str, pd.DataFrame]:
     summary_stats = _load_optional_json(data_dir / "summary_stats.json")
     action_space_report = _load_optional_json(data_dir / "action_space_report.json")
     output_space_report = _load_optional_json(data_dir / "output_space_report.json")
+    outcome_space_report = _load_optional_json(data_dir / "outcome_space_report.json")
+    trajectory_report = _load_optional_json(data_dir / "trajectory_report.json")
+    plausibility_report = _load_optional_json(data_dir / "plausibility_report.json")
     data_quality_report = _load_optional_json(data_dir / "data_quality_report.json")
     benchmark_dir_name = data_dir.name
     if benchmark_dir_name == "materialized_real":
@@ -50,6 +53,8 @@ def load_explorer_bundle(root: Path, data_dir: Path) -> dict[str, pd.DataFrame]:
     benchmark_report = _load_optional_json(benchmark_dir / "benchmark_report.json")
     benchmark_audit_report = _load_optional_json(benchmark_dir / "benchmark_audit_report.json")
     baseline_report = _load_optional_json(benchmark_dir / "baseline_report.json")
+    evaluation_dir = benchmark_dir / "evaluation_latest"
+    evaluation_report = _load_optional_json(evaluation_dir / "evaluation_report.json")
     source_contracts = load_jsonl(data_dir / "source_contracts_snapshot.jsonl") if (data_dir / "source_contracts_snapshot.jsonl").exists() else pd.DataFrame()
 
     if not source_registry.empty:
@@ -70,10 +75,14 @@ def load_explorer_bundle(root: Path, data_dir: Path) -> dict[str, pd.DataFrame]:
         "summary_stats": summary_stats,
         "action_space_report": action_space_report,
         "output_space_report": output_space_report,
+        "outcome_space_report": outcome_space_report,
+        "trajectory_report": trajectory_report,
+        "plausibility_report": plausibility_report,
         "data_quality_report": data_quality_report,
         "benchmark_report": benchmark_report,
         "benchmark_audit_report": benchmark_audit_report,
         "baseline_report": baseline_report,
+        "evaluation_report": evaluation_report,
         "source_contracts": source_contracts,
     }
 
@@ -93,13 +102,19 @@ def summarize_missingness(events: pd.DataFrame) -> pd.DataFrame:
 
 
 def benchmark_task_counts(benchmarks: pd.DataFrame) -> pd.DataFrame:
-    return pd.DataFrame(
-        [
-            {"task": "state_to_action", "count": int(benchmarks["task_state_to_action"].notna().sum())},
-            {"task": "state_plus_intervention_to_output", "count": int(benchmarks["task_state_intervention_to_output"].notna().sum())},
-            {"task": "state_plus_intervention_to_outcome", "count": int(benchmarks["task_state_intervention_to_outcome"].notna().sum())},
-        ]
-    )
+    task_map = {
+        "state_to_action": "task_state_to_action",
+        "state_plus_intervention_to_output": "task_state_intervention_to_output",
+        "state_plus_intervention_to_outcome": "task_state_intervention_to_outcome",
+        "next_step_transition": "task_next_step_transition",
+        "trajectory_step_prediction": "task_trajectory_step_prediction",
+        "plausibility_classification": "task_plausibility_classification",
+        "action_supported_vs_unsupported": "task_action_supported_vs_unsupported",
+    }
+    rows = []
+    for task, column in task_map.items():
+        rows.append({"task": task, "count": int(benchmarks[column].notna().sum()) if column in benchmarks.columns else 0})
+    return pd.DataFrame(rows)
 
 
 def filter_events(

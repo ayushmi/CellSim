@@ -464,6 +464,92 @@
       "default": null,
       "title": "Trajectory Group Id"
     },
+    "previous_event_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previous Event Ref"
+    },
+    "next_event_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next Event Ref"
+    },
+    "trajectory_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trajectory Id"
+    },
+    "trajectory_position": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trajectory Position"
+    },
+    "trajectory_length": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trajectory Length"
+    },
+    "trajectory_class": {
+      "default": "none",
+      "enum": [
+        "none",
+        "single_step_transition",
+        "short_chain",
+        "longitudinal_chain",
+        "pseudo_trajectory"
+      ],
+      "title": "Trajectory Class",
+      "type": "string"
+    },
+    "exact_vs_inferred_trajectory_flag": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exact Vs Inferred Trajectory Flag"
+    },
     "time_uncertainty_score": {
       "default": 0.0,
       "maximum": 1.0,
@@ -1076,6 +1162,29 @@
       "title": "Output Confidence Score",
       "type": "number"
     },
+    "output_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Ref"
+    },
+    "output_horizon_type": {
+      "default": "unavailable",
+      "enum": [
+        "short_horizon",
+        "medium_horizon",
+        "long_horizon",
+        "unavailable"
+      ],
+      "title": "Output Horizon Type",
+      "type": "string"
+    },
     "long_horizon_outcome_ref": {
       "anyOf": [
         {
@@ -1087,6 +1196,18 @@
       ],
       "default": null,
       "title": "Long Horizon Outcome Ref"
+    },
+    "outcome_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Outcome Ref"
     },
     "fate_outcome_label": {
       "anyOf": [
@@ -1159,6 +1280,34 @@
       ],
       "default": null,
       "title": "Outcome Time Horizon"
+    },
+    "outcome_horizon_type": {
+      "default": "unavailable",
+      "enum": [
+        "short_horizon",
+        "medium_horizon",
+        "long_horizon",
+        "unavailable"
+      ],
+      "title": "Outcome Horizon Type",
+      "type": "string"
+    },
+    "proxy_outcome_flag": {
+      "default": false,
+      "title": "Proxy Outcome Flag",
+      "type": "boolean"
+    },
+    "outcome_proxy_type": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Outcome Proxy Type"
     },
     "outcome_confidence_score": {
       "default": 0.0,
@@ -1442,6 +1591,7 @@
         "state_event",
         "transition_event",
         "knowledge_support_event",
+        "outcome_event",
         "outcome_support_event",
         "composite_event"
       ],
@@ -1481,6 +1631,30 @@
       "default": null,
       "title": "Output Type"
     },
+    "output_evidence_summary": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Evidence Summary"
+    },
+    "action_derivation_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Action Derivation Version"
+    },
     "action_candidate_labels": {
       "items": {
         "type": "string"
@@ -1499,6 +1673,110 @@
       ],
       "default": null,
       "title": "Action Evidence Summary"
+    },
+    "regulatory_support_score": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Regulatory Support Score"
+    },
+    "pathway_support_score": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pathway Support Score"
+    },
+    "metabolic_support_score": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Metabolic Support Score"
+    },
+    "viability_constraint_score": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Viability Constraint Score"
+    },
+    "overall_plausibility_score": {
+      "anyOf": [
+        {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Overall Plausibility Score"
+    },
+    "plausibility_support_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Plausibility Support Ref"
+    },
+    "plausibility_evidence_summary": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Plausibility Evidence Summary"
+    },
+    "unsupported_action_flag": {
+      "default": false,
+      "title": "Unsupported Action Flag",
+      "type": "boolean"
+    },
+    "evaluation_ready_flag": {
+      "default": false,
+      "title": "Evaluation Ready Flag",
+      "type": "boolean"
     }
   },
   "required": [

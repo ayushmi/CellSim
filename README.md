@@ -62,6 +62,19 @@ python -m cod.cli materialize --raw-dir examples/raw --output-dir examples/outpu
 pytest
 ```
 
+## Quick start: COD 3.0 public-open build
+
+```bash
+. .venv/bin/activate
+python -m cod.cli fetch-real --config configs/cod3_public_large.yaml --output-dir data/upstream_cod3_public
+python -m cod.cli materialize --raw-dir data/upstream_cod3_public/normalized_all --output-dir data/materialized_cod3_public
+python -m cod.cli benchmark-prep --input-dir data/materialized_cod3_public --output-dir benchmarks/cod3_public
+python -m cod.cli evaluate-predictions --input-dir data/materialized_cod3_public --predictions examples/predictions/cod3_sample_external_predictions.jsonl --output-dir benchmarks/cod3_public/evaluation_latest
+python -m cod.cli launch-explorer --data-dir data/materialized_cod3_public
+```
+
+COD 3.0 adds proxy-only outcome support, trajectory-aware event fields, plausibility scoring, and an external-model evaluation harness.
+
 ## Quick start: COD 2.0 public-open build
 
 ```bash
@@ -92,7 +105,7 @@ python -m cod.cli materialize --raw-dir data/upstream_real_large/normalized_all 
 python -m cod.cli benchmark-prep --input-dir data/materialized_real_large --output-dir benchmarks/real_public_large
 ```
 
-Point the Explorer at `data/materialized_cod2_public` to inspect the current COD 2.0 build, or `data/materialized_cod10_public` to compare against COD 1.0.
+Point the Explorer at `data/materialized_cod3_public` to inspect the current COD 3.0 build, or compare against `data/materialized_cod2_public` / `data/materialized_cod10_public`.
 
 ## CLI
 
@@ -143,9 +156,13 @@ Each build now emits:
 - `summary_stats.json`
 - `action_space_report.json`
 - `output_space_report.json`
+- `outcome_space_report.json`
+- `trajectory_report.json`
+- `plausibility_report.json`
 - `data_quality_report.json`
 - `benchmark_report.json`
 - `benchmark_audit_report.json`
+- `evaluation_report.json`
 - `release_notes.md`
 - explicit `state_depth_category` and `event_type` fields in materialized events
 
@@ -182,6 +199,8 @@ Important truthfulness notes:
 - Complete implementation status is in [`docs/implementation_report.md`](docs/implementation_report.md).
 - COD 1.0 platform notes are in [`docs/cod_1_0_platform.md`](docs/cod_1_0_platform.md).
 - COD 2.0 platform notes are in [`docs/cod_2_0_platform.md`](docs/cod_2_0_platform.md).
+- COD 3.0 platform notes are in [`docs/cod_3_0_platform.md`](docs/cod_3_0_platform.md).
 - Benchmark workflow notes are in [`docs/benchmarking.md`](docs/benchmarking.md).
 - Action derivation notes are in [`docs/action_derivation.md`](docs/action_derivation.md).
+- External prediction contract and evaluator notes are in [`docs/evaluation_contract.md`](docs/evaluation_contract.md).
 - Manual and controlled adapters are documented in [`docs/manual_adapters.md`](docs/manual_adapters.md).

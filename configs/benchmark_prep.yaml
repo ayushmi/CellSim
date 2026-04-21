@@ -1,4 +1,4 @@
-version: 1.0.0
+version: 3.0.0
 random_seed: 7
 splits:
   train_fraction: 0.7
@@ -7,6 +7,9 @@ splits:
 tasks:
   - state_to_action
   - state_plus_intervention_to_output
+  - next_step_transition
+  - trajectory_step_prediction
+  - plausibility_classification
   - held_out_source_family_generalization
   - held_out_cell_type_generalization
   - held_out_perturbation_generalization

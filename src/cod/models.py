@@ -128,6 +128,13 @@ class CellTransitionEvent(BaseModel):
     delta_t_to_output: str | None = None
     delta_t_to_outcome: str | None = None
     trajectory_group_id: str | None = None
+    previous_event_ref: str | None = None
+    next_event_ref: str | None = None
+    trajectory_id: str | None = None
+    trajectory_position: int | None = Field(default=None, ge=0)
+    trajectory_length: int | None = Field(default=None, ge=1)
+    trajectory_class: Literal["none", "single_step_transition", "short_chain", "longitudinal_chain", "pseudo_trajectory"] = "none"
+    exact_vs_inferred_trajectory_flag: bool | None = None
     time_uncertainty_score: float = Field(default=0.0, ge=0.0, le=1.0)
 
     intervention_present: bool
@@ -203,14 +210,20 @@ class CellTransitionEvent(BaseModel):
     viability_measure: str | None = None
     proliferation_measure: str | None = None
     output_confidence_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    output_ref: str | None = None
+    output_horizon_type: Literal["short_horizon", "medium_horizon", "long_horizon", "unavailable"] = "unavailable"
 
     long_horizon_outcome_ref: str | None = None
+    outcome_ref: str | None = None
     fate_outcome_label: str | None = None
     tissue_outcome_label: str | None = None
     therapy_response_label: str | None = None
     disease_progression_label: str | None = None
     survival_proxy: str | None = None
     outcome_time_horizon: str | None = None
+    outcome_horizon_type: Literal["short_horizon", "medium_horizon", "long_horizon", "unavailable"] = "unavailable"
+    proxy_outcome_flag: bool = False
+    outcome_proxy_type: str | None = None
     outcome_confidence_score: float = Field(default=0.0, ge=0.0, le=1.0)
 
     reward_context_label: str | None = None
@@ -264,6 +277,7 @@ class CellTransitionEvent(BaseModel):
         "state_event",
         "transition_event",
         "knowledge_support_event",
+        "outcome_event",
         "outcome_support_event",
         "composite_event",
     ] = "metadata_event"
@@ -276,6 +290,15 @@ class CellTransitionEvent(BaseModel):
     action_derivation_version: str | None = None
     action_candidate_labels: list[str] = Field(default_factory=list)
     action_evidence_summary: str | None = None
+    regulatory_support_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    pathway_support_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    metabolic_support_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    viability_constraint_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    overall_plausibility_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    plausibility_support_ref: str | None = None
+    plausibility_evidence_summary: str | None = None
+    unsupported_action_flag: bool = False
+    evaluation_ready_flag: bool = False
 
     @model_validator(mode="after")
     def validate_internal_consistency(self) -> "CellTransitionEvent":
@@ -291,6 +314,7 @@ class CellTransitionEvent(BaseModel):
                 self.disease_progression_label,
                 self.survival_proxy,
                 self.long_horizon_outcome_ref,
+                self.outcome_ref,
             ]
         ):
             raise ValueError("outcome_present_flag=True requires at least one outcome field")
@@ -299,6 +323,7 @@ class CellTransitionEvent(BaseModel):
         if self.output_present_flag and not any(
             [
                 self.short_horizon_output_ref,
+                self.output_ref,
                 self.differential_expression_signature_ref,
                 self.differential_protein_signature_ref,
                 self.differential_metabolite_signature_ref,
@@ -319,8 +344,16 @@ class CellTransitionEvent(BaseModel):
             raise ValueError("state_event requires weak_state_bearing or state_bearing depth")
         if self.event_type == "knowledge_support_event" and self.state_depth_category != "context_only":
             raise ValueError("knowledge_support_event requires context_only state depth")
-        if self.event_type == "outcome_support_event" and self.state_depth_category != "outcome_bearing":
-            raise ValueError("outcome_support_event requires outcome_bearing state depth")
+        if self.event_type in {"outcome_event", "outcome_support_event"} and self.state_depth_category != "outcome_bearing":
+            raise ValueError("outcome_event requires outcome_bearing state depth")
         if self.event_type == "composite_event" and not any([self.constraint_refs, self.external_signal_set_ref, self.resource_state_ref]):
             raise ValueError("composite_event requires fused or contextual support refs")
+        if self.proxy_outcome_flag and not self.outcome_present_flag:
+            raise ValueError("proxy_outcome_flag requires outcome_present_flag=True")
+        if self.trajectory_class != "none" and (self.trajectory_id is None or self.trajectory_length is None):
+            raise ValueError("trajectory metadata requires trajectory_id and trajectory_length")
+        if self.output_present_flag and self.output_horizon_type == "unavailable":
+            raise ValueError("output_present_flag=True requires output_horizon_type")
+        if self.outcome_present_flag and self.outcome_horizon_type == "unavailable":
+            raise ValueError("outcome_present_flag=True requires outcome_horizon_type")
         return self

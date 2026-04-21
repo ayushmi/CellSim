@@ -17,7 +17,16 @@ from .enums import (
 from .harmonization import assess_linkage, normalize_cell_type, normalize_disease, normalize_gene_id, normalize_tissue
 from .io_utils import dump_models, write_jsonl, write_parquet
 from .models import CellTransitionEvent, EvidenceTraceRecord, FeatureValue
-from .reporting import validate_build_consistency, write_action_space_report, write_build_summary, write_data_quality_report, write_output_space_report
+from .reporting import (
+    validate_build_consistency,
+    write_action_space_report,
+    write_build_summary,
+    write_data_quality_report,
+    write_outcome_space_report,
+    write_output_space_report,
+    write_plausibility_report,
+    write_trajectory_report,
+)
 from .source_support import load_source_support, source_support_rows
 from .source_registry import SOURCE_FAMILIES
 
@@ -38,11 +47,214 @@ def load_raw_records(raw_dir: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def build_knowledge_indices(raw_records: list[dict[str, Any]]) -> dict[str, Any]:
+    trrust_genes: set[str] = set()
+    omnipath_genes: set[str] = set()
+    reactome_terms: set[str] = set()
+    depmap_target_scores: dict[str, list[float]] = {}
+    encode_cell_types: set[str] = set()
+
+    for record in raw_records:
+        dataset = record.get("dataset")
+        if dataset == "TRRUST":
+            trrust_genes.update(item.get("feature_id") for item in record.get("signals", []) if item.get("feature_id"))
+        elif dataset == "OmniPath":
+            omnipath_genes.update(item.get("feature_id") for item in record.get("signals", []) if item.get("feature_id"))
+        elif dataset == "Reactome":
+            pathway = str(record.get("dominant_pathway", "") or "").strip().lower()
+            if pathway:
+                reactome_terms.add(pathway)
+        elif dataset == "BioModels":
+            pathway = str(record.get("dominant_pathway", "") or "").strip().lower()
+            if pathway:
+                reactome_terms.add(pathway)
+        elif dataset == "DepMap" and record.get("intervention_target_entity") and record.get("viability_measure") is not None:
+            try:
+                depmap_target_scores.setdefault(str(record["intervention_target_entity"]), []).append(float(record["viability_measure"]))
+            except (TypeError, ValueError):
+                pass
+        elif dataset == "ENCODE" and record.get("cell_type_label"):
+            encode_cell_types.add(str(record["cell_type_label"]))
+
+    depmap_target_mean = {
+        gene: sum(values) / len(values)
+        for gene, values in depmap_target_scores.items()
+        if values
+    }
+    return {
+        "trrust_genes": trrust_genes,
+        "omnipath_genes": omnipath_genes,
+        "reactome_terms": reactome_terms,
+        "depmap_target_mean": depmap_target_mean,
+        "encode_cell_types": encode_cell_types,
+    }
+
+
+def derive_outcome_fields(record: dict[str, Any], output_present_flag: bool) -> dict[str, Any]:
+    dataset = record.get("dataset")
+    outcome_fields: dict[str, Any] = {
+        "outcome_present_flag": False,
+        "outcome_ref": None,
+        "long_horizon_outcome_ref": None,
+        "outcome_horizon_type": "unavailable",
+        "proxy_outcome_flag": False,
+        "outcome_proxy_type": None,
+        "outcome_confidence_score": 0.0,
+        "therapy_response_label": record.get("therapy_response_label"),
+        "disease_progression_label": record.get("disease_progression_label"),
+        "survival_proxy": record.get("survival_proxy"),
+        "outcome_time_horizon": record.get("outcome_time_horizon"),
+    }
+
+    if dataset == "DepMap" and record.get("intervention_present") and record.get("viability_measure") is not None:
+        try:
+            viability_score = float(record["viability_measure"])
+        except (TypeError, ValueError):
+            viability_score = None
+        if viability_score is not None:
+            if viability_score >= 0.2:
+                label = "viability_resilient_proxy"
+                confidence = 0.78
+            else:
+                label = "viability_sensitive_proxy"
+                confidence = 0.72
+            outcome_fields.update(
+                {
+                    "outcome_present_flag": True,
+                    "outcome_ref": f"outcome:{record['record_id']}",
+                    "long_horizon_outcome_ref": f"outcome:{record['record_id']}",
+                    "outcome_horizon_type": "medium_horizon",
+                    "proxy_outcome_flag": True,
+                    "outcome_proxy_type": "viability_like_outcome",
+                    "outcome_confidence_score": confidence,
+                    "therapy_response_label": label,
+                    "outcome_time_horizon": "post_dependency_assay",
+                }
+            )
+    elif dataset == "TCGA" and any([record.get("therapy_response_label"), record.get("disease_progression_label"), record.get("survival_proxy")]):
+        outcome_fields.update(
+            {
+                "outcome_present_flag": True,
+                "outcome_ref": f"outcome:{record['record_id']}",
+                "long_horizon_outcome_ref": f"outcome:{record['record_id']}",
+                "outcome_horizon_type": "long_horizon",
+                "proxy_outcome_flag": True,
+                "outcome_proxy_type": "clinical_context_weak_outcome",
+                "outcome_confidence_score": 0.45,
+            }
+        )
+
+    output_horizon_type = "unavailable"
+    if output_present_flag:
+        if dataset in {"Perturb-seq", "LINCS"}:
+            output_horizon_type = "short_horizon"
+        elif dataset == "DepMap":
+            output_horizon_type = "medium_horizon"
+        else:
+            output_horizon_type = "short_horizon"
+    outcome_fields["output_horizon_type"] = output_horizon_type
+    return outcome_fields
+
+
+def derive_plausibility_fields(record: dict[str, Any], action_label: str, knowledge: dict[str, Any]) -> dict[str, Any]:
+    transcriptome_genes = {str(item.get("feature_id")) for item in record.get("transcriptome", []) if item.get("feature_id")}
+    intervention_target = str(record.get("intervention_target_entity", "") or "")
+    pathway = str(record.get("dominant_pathway", "") or "").lower()
+    cell_type = str(record.get("cell_type_label", "") or "")
+    measurement_support = float(record.get("measurement_support_score", 0.5) or 0.5)
+    direct_signal = bool(record.get("transcriptome") or record.get("signals") or record.get("viability_measure") is not None)
+
+    regulatory_hits = 0
+    if intervention_target and intervention_target in knowledge["trrust_genes"]:
+        regulatory_hits += 1
+    regulatory_hits += sum(1 for gene in transcriptome_genes if gene in knowledge["trrust_genes"])
+    regulatory_support_score = min(1.0, (0.2 if direct_signal else 0.0) + 0.12 * regulatory_hits + (0.2 if cell_type in knowledge["encode_cell_types"] else 0.0))
+
+    pathway_hits = 0
+    if pathway and any(term in pathway or pathway in term for term in knowledge["reactome_terms"]):
+        pathway_hits += 1
+    if action_label == "activate_interferon_program" and any(gene in transcriptome_genes for gene in {"STAT1", "IFIT1", "ISG15", "IFIT3", "CXCL10"}):
+        pathway_hits += 1
+    if action_label == "activate_inflammatory_cytokine_program" and any(gene in transcriptome_genes for gene in {"IL6", "TNF", "NFKBIA", "CXCL8"}):
+        pathway_hits += 1
+    if action_label == "enter_cell_cycle_or_proliferation_program" and any(gene in transcriptome_genes for gene in {"MKI67", "TOP2A", "PCNA"}):
+        pathway_hits += 1
+    pathway_support_score = min(1.0, (0.2 if pathway and pathway not in {"perturbation_response", "lincs_chemical_response"} else 0.0) + 0.22 * pathway_hits)
+
+    metabolic_hits = sum(1 for gene in transcriptome_genes if gene in {"LDHA", "SLC2A1", "PGK1", "ENO1"})
+    metabolic_support_score = min(1.0, (0.1 if direct_signal else 0.0) + 0.18 * metabolic_hits + (0.25 if "glycolysis" in pathway else 0.0))
+
+    depmap_mean = knowledge["depmap_target_mean"].get(intervention_target)
+    if depmap_mean is not None:
+        viability_constraint_score = min(1.0, max(0.0, 0.35 + (1.0 - depmap_mean) * 0.5))
+    elif record.get("viability_measure") is not None:
+        try:
+            viability_constraint_score = min(1.0, max(0.0, 0.35 + (1.0 - float(record["viability_measure"])) * 0.5))
+        except (TypeError, ValueError):
+            viability_constraint_score = 0.0
+    elif intervention_target:
+        viability_constraint_score = 0.25
+    else:
+        viability_constraint_score = 0.0
+
+    score_values = [regulatory_support_score, pathway_support_score, metabolic_support_score, viability_constraint_score, measurement_support]
+    overall_plausibility_score = sum(score_values) / len(score_values)
+    unsupported_action_flag = (
+        bool(record.get("intervention_present"))
+        and action_label not in {"no_confident_action_assignment", "maintain_homeostatic_program"}
+        and overall_plausibility_score < 0.28
+    )
+    return {
+        "regulatory_support_score": round(regulatory_support_score, 4),
+        "pathway_support_score": round(pathway_support_score, 4),
+        "metabolic_support_score": round(metabolic_support_score, 4),
+        "viability_constraint_score": round(viability_constraint_score, 4),
+        "overall_plausibility_score": round(overall_plausibility_score, 4),
+        "plausibility_evidence_summary": (
+            f"regulatory_hits={regulatory_hits}; pathway={pathway or 'none'}; "
+            f"transcriptome_genes={sorted(list(transcriptome_genes))[:8]}; "
+            f"depmap_target_mean={depmap_mean}"
+        ),
+        "unsupported_action_flag": unsupported_action_flag,
+    }
+
+
+def assign_trajectory_metadata(events: list[CellTransitionEvent]) -> None:
+    grouped: dict[str, list[CellTransitionEvent]] = {}
+    for event in events:
+        if event.event_type == "transition_event" and event.pre_state_ref and event.short_horizon_output_ref:
+            trajectory_id = f"traj:{event.source_dataset}:{event.cell_type_label}:{event.intervention_target_entity or 'none'}"
+            event.trajectory_id = trajectory_id
+            event.trajectory_group_id = trajectory_id
+            event.trajectory_class = "pseudo_trajectory"
+            event.exact_vs_inferred_trajectory_flag = False
+            event.previous_event_ref = event.pre_state_ref
+            event.next_event_ref = event.long_horizon_outcome_ref or event.short_horizon_output_ref
+            grouped.setdefault(trajectory_id, []).append(event)
+        elif event.event_type == "state_event":
+            trajectory_id = f"traj:{event.source_dataset}:{event.cell_type_label}:baseline"
+            event.trajectory_id = trajectory_id
+            event.trajectory_group_id = trajectory_id
+            event.trajectory_class = "single_step_transition"
+            event.exact_vs_inferred_trajectory_flag = True
+            grouped.setdefault(trajectory_id, []).append(event)
+    for trajectory_id, members in grouped.items():
+        members.sort(key=lambda item: (item.t0_timestamp, item.cod_event_id))
+        length = len(members)
+        for position, event in enumerate(members, start=1):
+            event.trajectory_position = position
+            event.trajectory_length = length
+            if event.trajectory_class == "single_step_transition":
+                event.previous_event_ref = None
+                event.next_event_ref = None
+
+
 def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, int]:
     source_contracts = load_source_contracts(root)
     load_action_ontology(root)
     split_spec = load_benchmark_splits(root)
     raw_records = load_raw_records(raw_dir)
+    knowledge = build_knowledge_indices(raw_records)
     family_map = {row["source_name"]: row["source_family"] for row in source_support_rows(root)}
 
     events: list[CellTransitionEvent] = []
@@ -138,27 +350,21 @@ def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, in
             or record.get("secretome_signature_ref")
             or record.get("morphology_signature_ref")
         )
-        outcome_present_flag = bool(
-            record.get("fate_outcome_label")
-            or record.get("tissue_outcome_label")
-            or record.get("therapy_response_label")
-            or record.get("disease_progression_label")
-            or record.get("survival_proxy")
-            or record.get("long_horizon_outcome_ref")
-        )
+        outcome_fields = derive_outcome_fields(record, output_present_flag)
+        outcome_present_flag = outcome_fields["outcome_present_flag"]
         state_representation_type = StateRepresentationType(record.get("state_representation_type", "harmonized"))
         if record["dataset"] in {"OmniPath", "Reactome", "TRRUST", "BioModels", "Recon3D", "KEGG"}:
             state_depth_category = "context_only"
             event_type = "knowledge_support_event"
         elif outcome_present_flag and not has_expression_features and not record.get("intervention_present"):
             state_depth_category = "outcome_bearing"
-            event_type = "outcome_support_event"
+            event_type = "outcome_event"
         elif record.get("constraint_refs") and (record.get("signals") or has_expression_features):
             state_depth_category = "transition_bearing" if record.get("intervention_present") and has_expression_features else "context_only"
             event_type = "composite_event"
         elif record.get("intervention_present") and has_expression_features:
-            state_depth_category = "transition_bearing"
-            event_type = "transition_event"
+            state_depth_category = "outcome_bearing" if outcome_present_flag else "transition_bearing"
+            event_type = "composite_event" if outcome_present_flag else "transition_event"
         elif has_expression_features:
             state_depth_category = "weak_state_bearing" if state_representation_type == StateRepresentationType.inferred else "state_bearing"
             event_type = "state_event"
@@ -168,6 +374,15 @@ def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, in
         else:
             state_depth_category = "metadata_only"
             event_type = "metadata_event"
+        plausibility_fields = derive_plausibility_fields(record, action.action_level_2, knowledge)
+        evaluation_ready_flag = bool(
+            record.get("intervention_present")
+            and (
+                output_present_flag
+                or outcome_present_flag
+                or action.action_level_2 != "no_confident_action_assignment"
+            )
+        )
 
         event = CellTransitionEvent(
             cod_event_id=event_id,
@@ -211,7 +426,7 @@ def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, in
             t0_timestamp=record["t0_timestamp"],
             t0_time_unit=record.get("t0_time_unit", "hours"),
             delta_t_to_output=record.get("delta_t_to_output"),
-            delta_t_to_outcome=record.get("delta_t_to_outcome"),
+            delta_t_to_outcome=record.get("delta_t_to_outcome", outcome_fields.get("outcome_time_horizon")),
             trajectory_group_id=record.get("trajectory_group_id"),
             time_uncertainty_score=record.get("time_uncertainty_score", 0.1),
             intervention_present=record.get("intervention_present", False),
@@ -274,6 +489,7 @@ def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, in
             action_confidence_score=action.confidence_score,
             action_assignment_method=ActionAssignmentMethod(action.assignment_method),
             short_horizon_output_ref=record.get("short_horizon_output_ref", f"output:{event_id}" if output_present_flag else None),
+            output_ref=record.get("short_horizon_output_ref", f"output:{event_id}" if output_present_flag else None),
             differential_expression_signature_ref=transcriptome_ref if has_expression_features else None,
             differential_protein_signature_ref=record.get("proteome_signature_ref"),
             differential_metabolite_signature_ref=metabolome_ref if record.get("metabolome") else None,
@@ -282,14 +498,19 @@ def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, in
             viability_measure=record.get("viability_measure"),
             proliferation_measure=record.get("proliferation_measure"),
             output_confidence_score=record.get("output_confidence_score", 0.75 if output_present_flag else 0.0),
-            long_horizon_outcome_ref=record.get("long_horizon_outcome_ref") if outcome_present_flag else None,
+            output_horizon_type=outcome_fields["output_horizon_type"],
+            long_horizon_outcome_ref=outcome_fields["long_horizon_outcome_ref"] if outcome_present_flag else None,
+            outcome_ref=outcome_fields["outcome_ref"] if outcome_present_flag else None,
             fate_outcome_label=record.get("fate_outcome_label"),
             tissue_outcome_label=record.get("tissue_outcome_label"),
-            therapy_response_label=record.get("therapy_response_label"),
-            disease_progression_label=record.get("disease_progression_label"),
-            survival_proxy=record.get("survival_proxy"),
-            outcome_time_horizon=record.get("outcome_time_horizon"),
-            outcome_confidence_score=record.get("outcome_confidence_score", 0.55 if outcome_present_flag else 0.0),
+            therapy_response_label=outcome_fields["therapy_response_label"],
+            disease_progression_label=outcome_fields["disease_progression_label"],
+            survival_proxy=outcome_fields["survival_proxy"],
+            outcome_time_horizon=outcome_fields["outcome_time_horizon"],
+            outcome_horizon_type=outcome_fields["outcome_horizon_type"],
+            proxy_outcome_flag=outcome_fields["proxy_outcome_flag"],
+            outcome_proxy_type=outcome_fields["outcome_proxy_type"],
+            outcome_confidence_score=outcome_fields["outcome_confidence_score"],
             reward_context_label=record.get("reward_context_label"),
             candidate_reward_variables_ref=record.get("candidate_reward_variables_ref"),
             fitness_proxy_score=record.get("fitness_proxy_score"),
@@ -339,8 +560,30 @@ def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, in
             action_derivation_version="rule_based_program_scoring_v3",
             action_candidate_labels=record.get("_action_candidates", [action.action_level_2]),
             action_evidence_summary=record.get("_action_evidence_summary"),
+            regulatory_support_score=plausibility_fields["regulatory_support_score"],
+            pathway_support_score=plausibility_fields["pathway_support_score"],
+            metabolic_support_score=plausibility_fields["metabolic_support_score"],
+            viability_constraint_score=plausibility_fields["viability_constraint_score"],
+            overall_plausibility_score=plausibility_fields["overall_plausibility_score"],
+            plausibility_support_ref=f"plausibility:{event_id}",
+            plausibility_evidence_summary=plausibility_fields["plausibility_evidence_summary"],
+            unsupported_action_flag=plausibility_fields["unsupported_action_flag"],
+            evaluation_ready_flag=evaluation_ready_flag,
         )
         events.append(event)
+        traces.append(
+            EvidenceTraceRecord(
+                evidence_trace_id=f"trace:{record['record_id']}:plausibility",
+                cod_event_id=event_id,
+                field_name="overall_plausibility_score",
+                source_dataset=record["dataset"],
+                source_record_pointer=record["source_record_pointer"],
+                transformation_step="plausibility_scoring",
+                rule_or_model="cod_plausibility_rules_v1",
+                confidence=max(0.4, plausibility_fields["overall_plausibility_score"]),
+                notes=plausibility_fields["plausibility_evidence_summary"],
+            )
+        )
 
         benchmark_rows.append(
             {
@@ -348,12 +591,18 @@ def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, in
                 "task_state_to_action": event.action_level_2 if event.action_level_2 and event.action_level_2 != "no_confident_action_assignment" else None,
                 "task_state_intervention_to_output": event.short_horizon_output_ref if event.output_present_flag and event.intervention_present else None,
                 "task_state_intervention_to_outcome": event.long_horizon_outcome_ref if event.outcome_present_flag and event.intervention_present else None,
+                "task_next_step_transition": event.post_state_ref if event.output_present_flag and event.intervention_present else None,
+                "task_trajectory_step_prediction": event.next_event_ref if event.trajectory_id else None,
+                "task_plausibility_classification": not event.unsupported_action_flag,
+                "task_action_supported_vs_unsupported": "supported" if not event.unsupported_action_flag else "unsupported",
                 "held_out_cell_type_bucket": event.cell_type_label in split_spec["splits"]["held_out_cell_types"]["values"],
                 "held_out_intervention_bucket": (event.intervention_target_entity or "none") in split_spec["splits"]["held_out_interventions"]["values"],
                 "benchmark_state_eligible": event.has_expression_features,
                 "benchmark_action_eligible": bool(event.action_level_2 and event.action_level_2 != "no_confident_action_assignment"),
                 "benchmark_output_eligible": bool(event.output_present_flag and event.intervention_present),
                 "benchmark_outcome_eligible": bool(event.outcome_present_flag and event.intervention_present),
+                "benchmark_trajectory_eligible": bool(event.trajectory_id and event.next_event_ref),
+                "benchmark_plausibility_eligible": event.overall_plausibility_score is not None,
                 "state_depth_category": event.state_depth_category,
                 "event_type": event.event_type,
                 "evidence_tier": int(event.causal_evidence_tier),
@@ -361,8 +610,14 @@ def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, in
                 "source_dataset": event.source_dataset,
                 "cell_type_label": event.cell_type_label,
                 "intervention_target_entity": event.intervention_target_entity,
+                "measurement_pairing_status": event.measurement_pairing_status.value,
             }
         )
+
+    assign_trajectory_metadata(events)
+    for benchmark_row, event in zip(benchmark_rows, events, strict=True):
+        benchmark_row["task_trajectory_step_prediction"] = event.next_event_ref if event.trajectory_id else None
+        benchmark_row["benchmark_trajectory_eligible"] = bool(event.trajectory_id and event.next_event_ref)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     dump_models(output_dir / "cod_events.jsonl", events)
@@ -379,6 +634,9 @@ def materialize_cod(root: Path, raw_dir: Path, output_dir: Path) -> dict[str, in
     summary = write_build_summary(output_dir, output_dir / "summary_stats.json")
     write_action_space_report(output_dir, output_dir / "action_space_report.json")
     write_output_space_report(output_dir, output_dir / "output_space_report.json")
+    write_outcome_space_report(output_dir, output_dir / "outcome_space_report.json")
+    write_trajectory_report(output_dir, output_dir / "trajectory_report.json")
+    write_plausibility_report(output_dir, output_dir / "plausibility_report.json")
     write_data_quality_report(output_dir, output_dir / "data_quality_report.json")
     validate_build_consistency(output_dir, summary)
     source_manifest_bundle: list[dict[str, Any]] = []
